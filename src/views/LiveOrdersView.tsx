@@ -21,6 +21,7 @@ export const LiveOrdersView: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
   const [selectedOrder, setSelectedOrder] = useState<Order>(INITIAL_ORDERS[0]);
   const [filterType, setFilterType] = useState<'all' | 'dine-in' | 'takeout'>('all');
+  const [showMobileDetails, setShowMobileDetails] = useState(false);
 
   const incomingOrders = orders.filter(o => o.status === 'new');
   const inPrepOrders = orders.filter(o => o.status === 'prep');
@@ -117,7 +118,7 @@ export const LiveOrdersView: React.FC = () => {
               {incomingOrders.map((order) => (
                 <div
                   key={order.id}
-                  onClick={() => setSelectedOrder(order)}
+                  onClick={() => { setSelectedOrder(order); setShowMobileDetails(true); }}
                   className={`p-4 rounded-2xl bg-[#111636] border transition-all cursor-pointer shadow-lg hover:border-white/[0.18] ${
                     selectedOrder?.id === order.id ? 'border-coral-400/60 ring-1 ring-coral-400/30' : 'border-white/[0.06]'
                   }`}
@@ -198,7 +199,7 @@ export const LiveOrdersView: React.FC = () => {
               {inPrepOrders.map((order) => (
                 <div
                   key={order.id}
-                  onClick={() => setSelectedOrder(order)}
+                  onClick={() => { setSelectedOrder(order); setShowMobileDetails(true); }}
                   className={`p-4 rounded-2xl bg-[#111636] border transition-all cursor-pointer shadow-lg hover:border-white/[0.18] ${
                     selectedOrder?.id === order.id ? 'border-coral-400/60 ring-1 ring-coral-400/30' : 'border-white/[0.06]'
                   }`}
@@ -263,23 +264,35 @@ export const LiveOrdersView: React.FC = () => {
         </div>
       </div>
 
-      {/* Right Drawer: Order Inspector */}
+      {/* Right Drawer: Order Inspector (Permanent on xl, slide-up modal on mobile/tablet) */}
       {selectedOrder && (
-        <div className="w-full xl:w-[460px] bg-[#090c21] border-l border-white/[0.06] flex flex-col justify-between overflow-y-auto">
-          {/* Header */}
-          <div className="p-5 border-b border-white/[0.06] bg-[#0c102a]">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-white text-base font-mono">Order {selectedOrder.ticketNumber} Details</span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
-                  In Prep ({selectedOrder.elapsedMinutes}m)
-                </span>
+        <div className={`
+          ${showMobileDetails ? 'fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4' : 'hidden xl:flex'}
+          xl:static xl:w-[460px] xl:bg-[#090c21] xl:border-l xl:border-white/[0.06] xl:p-0 xl:backdrop-blur-none
+        `}>
+          <div className="w-full sm:max-w-lg xl:max-w-none h-[85vh] sm:h-auto sm:max-h-[90vh] xl:h-full rounded-t-3xl sm:rounded-3xl xl:rounded-none bg-[#090c21] border-t sm:border border-white/10 xl:border-none flex flex-col justify-between overflow-y-auto shadow-2xl">
+            {/* Header */}
+            <div className="p-4 sm:p-5 border-b border-white/[0.06] bg-[#0c102a] flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-bold text-white text-base font-mono">Order {selectedOrder.ticketNumber} Details</span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
+                    In Prep ({selectedOrder.elapsedMinutes}m)
+                  </span>
+                </div>
+                <div className="text-xs text-slate-400">
+                  {selectedOrder.tableLabel} • {selectedOrder.guestCount} Guests • Server: {selectedOrder.server}
+                </div>
               </div>
+
+              {/* Close Button on Mobile/Tablet */}
+              <button
+                onClick={() => setShowMobileDetails(false)}
+                className="xl:hidden p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <div className="text-xs text-slate-400">
-              {selectedOrder.tableLabel} • {selectedOrder.guestCount} Guests • Server: {selectedOrder.server}
-            </div>
-          </div>
 
           {/* SLA Progress Bar */}
           <div className="p-5 border-b border-white/[0.06] bg-[#0e1333] space-y-2">
@@ -412,6 +425,7 @@ export const LiveOrdersView: React.FC = () => {
                 Void Order
               </button>
             </div>
+          </div>
           </div>
         </div>
       )}

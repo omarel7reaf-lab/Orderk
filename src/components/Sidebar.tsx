@@ -11,7 +11,8 @@ import {
   Settings, 
   ChevronDown, 
   Headphones, 
-  Lock
+  Lock,
+  X
 } from 'lucide-react';
 import { NavView } from '../types/pos';
 
@@ -21,6 +22,7 @@ interface SidebarProps {
   orderCount?: number;
   kdsActiveCount?: number;
   onLockClick?: () => void;
+  onClose?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -28,7 +30,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNavigate,
   orderCount = 14,
   kdsActiveCount = 6,
-  onLockClick
+  onLockClick,
+  onClose
 }) => {
   const navItems = [
     { id: 'dashboard' as NavView, label: 'Dashboard', icon: LayoutDashboard },
@@ -58,6 +61,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </span>
             </div>
           </div>
+
+          {/* Close button for mobile/tablet */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="lg:hidden p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition"
+              title="Close Menu"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Location Dropdown selector */}

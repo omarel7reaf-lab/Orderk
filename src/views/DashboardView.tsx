@@ -24,41 +24,41 @@ interface DashboardViewProps {
 
 export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   return (
-    <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
+    <div className="p-3 sm:p-5 md:p-6 space-y-4 md:space-y-6 max-w-[1600px] mx-auto responsive-view-container">
       {/* Banner / Shift Live Telemetry */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-white/[0.06]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 pb-2 border-b border-white/[0.06]">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
-            <span className="text-[11px] font-bold tracking-wider uppercase text-rose-400">
+            <span className="text-[10px] md:text-[11px] font-bold tracking-wider uppercase text-rose-400">
               Shift Live Telemetry
             </span>
-            <span className="text-[11px] text-slate-500">• Updated 42s ago</span>
+            <span className="text-[10px] md:text-[11px] text-slate-500">• Updated 42s ago</span>
           </div>
-          <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-tight mobile-title">
             Good evening, Elena. Downtown Bistro is operating at peak efficiency.
           </h1>
         </div>
 
         {/* Filters & Actions */}
-        <div className="flex flex-wrap items-center gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#131738] border border-white/[0.08] text-xs text-slate-200 hover:bg-[#181f4a] transition">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <button className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#131738] border border-white/[0.08] text-xs text-slate-200 hover:bg-[#181f4a] transition">
             <Clock className="w-3.5 h-3.5 text-coral-400" />
-            <span>Today: Dinner Shift</span>
-            <ChevronDown className="w-3 h-3 text-slate-400 ml-1" />
+            <span className="text-[11px] sm:text-xs">Today: Dinner</span>
+            <ChevronDown className="w-3 h-3 text-slate-400 ml-0.5" />
           </button>
 
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#131738] border border-white/[0.08] text-xs text-slate-200 hover:bg-[#181f4a] transition">
+          <button className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#131738] border border-white/[0.08] text-xs text-slate-200 hover:bg-[#181f4a] transition">
             <TrendingUp className="w-3.5 h-3.5 text-blue-400" />
-            <span>vs. Last Friday</span>
-            <ChevronDown className="w-3 h-3 text-slate-400 ml-1" />
+            <span className="text-[11px] sm:text-xs">vs. Last Friday</span>
+            <ChevronDown className="w-3 h-3 text-slate-400 ml-0.5" />
           </button>
 
-          <button className="p-2 rounded-xl bg-[#131738] border border-white/[0.08] text-slate-300 hover:text-white transition">
+          <button className="p-2 rounded-xl bg-[#131738] border border-white/[0.08] text-slate-300 hover:text-white transition" title="Export Data">
             <Download className="w-3.5 h-3.5" />
           </button>
           
-          <button className="p-2 rounded-xl bg-[#131738] border border-white/[0.08] text-slate-300 hover:text-white transition">
+          <button className="p-2 rounded-xl bg-[#131738] border border-white/[0.08] text-slate-300 hover:text-white transition" title="Refresh Telemetry">
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -206,14 +206,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             </div>
 
             {/* Custom Interactive SVG / Bar Chart Representation */}
-            <div className="relative pt-6 pb-2">
+            <div className="relative pt-6 pb-2 overflow-x-auto no-scrollbar">
               {/* Peak window highlight pill */}
-              <div className="absolute top-0 left-[48%] -translate-x-1/2 px-2.5 py-1 rounded-full bg-coral-500/20 text-coral-300 text-[10px] font-bold border border-coral-500/30 flex items-center gap-1">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-full bg-coral-500/20 text-coral-300 text-[10px] font-bold border border-coral-500/30 flex items-center gap-1 whitespace-nowrap">
                 <Flame className="w-3 h-3 text-coral-400 fill-coral-400" />
                 <span>PEAK DINNER WINDOW (17:00 - 21:00)</span>
               </div>
 
-              <div className="h-44 flex items-end justify-between gap-2 pt-6 px-2">
+              <div className="h-44 flex items-end justify-between gap-1.5 sm:gap-2 pt-6 px-1 sm:px-2 min-w-[480px] sm:min-w-0">
                 {[
                   { hour: '12h', rev: 320, orders: 12, height: '22%' },
                   { hour: '13h', rev: 450, orders: 16, height: '30%' },
@@ -252,19 +252,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs text-slate-400">
+          <div className="pt-3 border-t border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-slate-400">
             <span className="flex items-center gap-1 text-slate-300">
               <TrendingUp className="w-3.5 h-3.5 text-coral-400" />
-              Dinner ticket average: <strong className="text-white">$59.36</strong> (+$7.10 vs last week)
+              Dinner ticket avg: <strong className="text-white">$59.36</strong>
             </span>
             <span className="font-mono text-emerald-400">Pace: 18.2 tickets/hr</span>
           </div>
         </div>
 
         {/* Top Dishes Tonight */}
-        <div className="p-5 rounded-2xl bg-[#101432] border border-white/[0.07] shadow-xl flex flex-col justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#101432] border border-white/[0.07] shadow-xl flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div>
                 <h3 className="text-sm font-bold text-white tracking-tight">Top Dishes Tonight</h3>
                 <p className="text-xs text-slate-400">Ranked by revenue contribution & volume</p>
@@ -272,12 +272,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               <Utensils className="w-4 h-4 text-coral-400" />
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5 sm:space-y-3">
               {[
                 { rank: 1, name: 'Prime Dry-Aged Ribeye', sold: '38 sold tonight', rev: '$1,976', margin: '72% Margin', img: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=120&auto=format&fit=crop&q=80' },
                 { rank: 2, name: 'Truffle Tagliolini', sold: '46 sold tonight', rev: '$1,196', margin: '81% Margin', img: 'https://images.unsplash.com/photo-1621996346565-e3d5d6281292?w=120&auto=format&fit=crop&q=80' },
                 { rank: 3, name: 'Smoked Old Fashioned', sold: '64 sold tonight', rev: '$1,024', margin: '86% Margin', img: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=120&auto=format&fit=crop&q=80' },
-                { rank: 4, name: 'Crispy Calamari Fritti', sold: '31 sold tonight', rev: '$589', margin: '74% Margin', img: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=120&auto=format&fit=crop&q=80' }
+                { rank: 4, name: 'Wild Mushroom Risotto', sold: '33 sold tonight', rev: '$792', margin: '79% Margin', img: 'https://images.unsplash.com/photo-1541529086526-db283c563270?w=120&auto=format&fit=crop&q=80' }
               ].map((dish) => (
                 <div key={dish.rank} className="flex items-center justify-between p-2 rounded-xl bg-[#141a3d] hover:bg-[#1a2350] border border-white/[0.04] transition group">
                   <div className="flex items-center gap-3 min-w-0">

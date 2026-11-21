@@ -161,8 +161,8 @@ export const KDSView: React.FC = () => {
       </div>
 
       {/* Tickets Grid */}
-      <div className="flex-1 p-4 overflow-y-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-5 gap-4">
+      <div className="flex-1 p-3 sm:p-4 overflow-y-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
           {tickets.map((ticket) => (
             <div
               key={ticket.id}

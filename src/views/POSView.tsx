@@ -38,6 +38,9 @@ export const POSView: React.FC<POSViewProps> = ({ onFireOrder, initialTable = 'T
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTable, setActiveTable] = useState(initialTable);
   
+  // Mobile / Tablet Tab Switcher ('menu' vs 'cart')
+  const [mobileTab, setMobileTab] = useState<'menu' | 'cart'>('menu');
+  
   // Cart starts completely fresh with 0 orders
   const [cart, setCart] = useState<CartItem[]>([]);
 
@@ -185,11 +188,46 @@ export const POSView: React.FC<POSViewProps> = ({ onFireOrder, initialTable = 'T
   };
 
   return (
-    <div className="flex-1 flex flex-col xl:flex-row h-[calc(100vh-4rem)] overflow-hidden">
+    <div className="flex-1 flex flex-col lg:flex-row h-full overflow-hidden relative">
+      {/* ── Mobile / Tablet Segmented Switcher (< lg) ── */}
+      <div className="lg:hidden flex items-center justify-between p-2 bg-[#0c102a] border-b border-white/[0.08] sticky top-0 z-20">
+        <div className="grid grid-cols-2 gap-2 w-full">
+          <button
+            onClick={() => setMobileTab('menu')}
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${
+              mobileTab === 'menu'
+                ? 'bg-gradient-to-r from-[#ff9e93] to-[#ff7b72] text-[#190808] shadow-md shadow-coral-500/25'
+                : 'bg-[#121634] text-slate-300 hover:text-white'
+            }`}
+          >
+            <Utensils className="w-3.5 h-3.5" />
+            <span>القائمة (Menu)</span>
+          </button>
+          <button
+            onClick={() => setMobileTab('cart')}
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 relative ${
+              mobileTab === 'cart'
+                ? 'bg-gradient-to-r from-[#ff9e93] to-[#ff7b72] text-[#190808] shadow-md shadow-coral-500/25'
+                : 'bg-[#121634] text-slate-300 hover:text-white'
+            }`}
+          >
+            <ShoppingBag className="w-3.5 h-3.5" />
+            <span>سلة الطلب ({totalCount})</span>
+            {total > 0 && (
+              <span className="font-mono text-[10px] px-1.5 py-0.2 rounded bg-black/20 text-[#190808]">
+                ${total.toFixed(0)}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
       {/* Left Menu Section */}
-      <div className="flex-1 flex flex-col bg-[#0b0e24] overflow-y-auto border-r border-white/[0.06]">
+      <div className={`flex-1 flex flex-col bg-[#0b0e24] overflow-y-auto border-r border-white/[0.06] ${
+        mobileTab === 'cart' ? 'hidden lg:flex' : 'flex'
+      }`}>
         {/* Top Order Type Selector & Table Bar */}
-        <div className="p-4 border-b border-white/[0.06] bg-[#0c102a] flex flex-wrap items-center justify-between gap-3">
+        <div className="p-3 sm:p-4 border-b border-white/[0.06] bg-[#0c102a] flex flex-wrap items-center justify-between gap-2 sm:gap-3">
           {/* Order Types */}
           <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#131737] border border-white/[0.06]">
             {[
@@ -360,12 +398,43 @@ export const POSView: React.FC<POSViewProps> = ({ onFireOrder, initialTable = 'T
             </span>
           </div>
         </div>
+
+        {/* Floating Cart Pill on Mobile when items in cart */}
+        {cart.length > 0 && mobileTab === 'menu' && (
+          <div className="lg:hidden fixed bottom-20 left-3 right-3 z-30 animate-in slide-in-from-bottom-3 duration-200">
+            <button
+              onClick={() => setMobileTab('cart')}
+              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#ff9e93] to-[#ff7b72] text-[#190808] font-extrabold text-xs shadow-2xl shadow-coral-500/40 border border-coral-300/40 flex items-center justify-between active:scale-98 transition"
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-[#190808] text-coral-300 flex items-center justify-center text-[10px] font-bold">
+                  {totalCount}
+                </span>
+                <span>عرض سلة الطلب وإرسال للمطبخ</span>
+              </div>
+              <div className="flex items-center gap-1 font-mono text-xs">
+                <span>${total.toFixed(2)}</span>
+                <span>➔</span>
+              </div>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Right Cart / Order Summary Section */}
-      <div className="w-full xl:w-96 bg-[#090c21] border-l border-white/[0.06] flex flex-col justify-between overflow-hidden">
+      <div className={`w-full lg:w-80 xl:w-96 bg-[#090c21] border-l border-white/[0.06] flex flex-col justify-between overflow-hidden ${
+        mobileTab === 'menu' ? 'hidden lg:flex' : 'flex'
+      }`}>
         {/* Cart Header */}
-        <div className="p-4 border-b border-white/[0.06] bg-[#0c102b]">
+        <div className="p-3 sm:p-4 border-b border-white/[0.06] bg-[#0c102b]">
+          {/* Mobile Back to Menu Button */}
+          <button
+            onClick={() => setMobileTab('menu')}
+            className="lg:hidden mb-2 text-xs text-coral-400 hover:text-coral-300 font-semibold flex items-center gap-1"
+          >
+            ← العودة لإضافة أطباق أخرى من المنيو
+          </button>
+
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-coral-400"></span>

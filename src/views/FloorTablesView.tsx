@@ -27,6 +27,7 @@ export const FloorTablesView: React.FC<FloorTablesViewProps> = ({ onNavigateToPO
     INITIAL_TABLES.find(t => t.id === 't-07') || INITIAL_TABLES[0]
   );
   const [activeSector, setActiveSector] = useState<'main' | 'patio' | 'bar' | 'private'>('main');
+  const [showMobileInspector, setShowMobileInspector] = useState(false);
 
   const occupiedCount = tables.filter(t => t.status === 'occupied' || t.status === 'selected' || t.status === 'bill-requested' || t.status === 'held').length;
   const availableCount = tables.filter(t => t.status === 'available').length;
@@ -35,6 +36,7 @@ export const FloorTablesView: React.FC<FloorTablesViewProps> = ({ onNavigateToPO
 
   const handleSelectTable = (table: TableItem) => {
     setSelectedTable(table);
+    setShowMobileInspector(true);
   };
 
   const markTableClean = (tableId: string) => {
@@ -283,23 +285,37 @@ export const FloorTablesView: React.FC<FloorTablesViewProps> = ({ onNavigateToPO
         </div>
       </div>
 
-      {/* Right Table Inspector Panel */}
+      {/* Right Table Inspector Panel (Permanent on xl, slide-up sheet on mobile/tablet) */}
       {selectedTable && (
-        <div className="w-full xl:w-96 bg-[#090d24] border-l border-white/[0.06] flex flex-col justify-between overflow-y-auto">
-          {/* Header */}
-          <div className="p-5 border-b border-white/[0.06] bg-[#0c112d]">
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="text-lg font-extrabold text-white">Table {selectedTable.number}</h3>
-              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                selectedTable.status === 'available' ? 'bg-emerald-500/20 text-emerald-300' :
-                selectedTable.status === 'cleaning' ? 'bg-amber-500/20 text-amber-300' :
-                'bg-coral-500/20 text-coral-300'
-              }`}>
-                {selectedTable.status.toUpperCase()}
-              </span>
+        <div className={`
+          ${showMobileInspector ? 'fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4' : 'hidden xl:flex'}
+          xl:static xl:w-96 xl:bg-[#090d24] xl:border-l xl:border-white/[0.06] xl:p-0 xl:backdrop-blur-none
+        `}>
+          <div className="w-full sm:max-w-md xl:max-w-none h-[85vh] sm:h-auto sm:max-h-[90vh] xl:h-full rounded-t-3xl sm:rounded-3xl xl:rounded-none bg-[#090d24] border-t sm:border border-white/10 xl:border-none flex flex-col justify-between overflow-y-auto shadow-2xl">
+            {/* Header */}
+            <div className="p-4 sm:p-5 border-b border-white/[0.06] bg-[#0c112d] flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h3 className="text-lg font-extrabold text-white">Table {selectedTable.number}</h3>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    selectedTable.status === 'available' ? 'bg-emerald-500/20 text-emerald-300' :
+                    selectedTable.status === 'cleaning' ? 'bg-amber-500/20 text-amber-300' :
+                    'bg-coral-500/20 text-coral-300'
+                  }`}>
+                    {selectedTable.status.toUpperCase()}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400">Section 2 • Center Floor</p>
+              </div>
+
+              {/* Close button for mobile/tablet */}
+              <button
+                onClick={() => setShowMobileInspector(false)}
+                className="xl:hidden p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <p className="text-xs text-slate-400">Section 2 • Center Floor</p>
-          </div>
 
           {/* Details & Specs */}
           <div className="p-5 space-y-4 flex-1">
@@ -392,6 +408,7 @@ export const FloorTablesView: React.FC<FloorTablesViewProps> = ({ onNavigateToPO
                 ✓ Mark Clean & Free
               </button>
             )}
+          </div>
           </div>
         </div>
       )}

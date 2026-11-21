@@ -6,12 +6,23 @@
   * {
     border-color: rgba(255, 255, 255, 0.08);
   }
+  html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #070919;
+    color: #f1f5f9;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
 }
 
 /* Custom scrollbars matching the luxury dark UI */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -56,3 +67,156 @@
   border-color: rgba(255, 255, 255, 0.16);
 }
 
+/* Hide scrollbar for clean horizontal tab rows */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ==========================================================================
+   CSS Media Queries for OrderK POS:
+   1. Phone (< 768px)
+   2. iPad / Tablet (768px - 1024px)
+   3. Laptop / Desktop (> 1024px)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. MOBILE PHONES (max-width: 768px)
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 768px) {
+  /* Prevent horizontal unwanted overflow */
+  body, #root {
+    overflow-x: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Compact typography on small mobile screens */
+  .mobile-title {
+    font-size: 1.125rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .mobile-subtext {
+    font-size: 0.75rem !important;
+  }
+
+  /* Compact padding for containers */
+  .responsive-view-container {
+    padding: 0.75rem !important;
+    padding-bottom: 5.5rem !important; /* Extra bottom padding so content isn't covered by bottom nav */
+  }
+
+  /* Touch-friendly larger tap targets */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Food card layout on mobile phones: compact height with full visibility */
+  .mobile-food-card {
+    padding: 0.625rem !important;
+  }
+  .mobile-food-card img {
+    height: 110px !important;
+  }
+
+  /* Chart container horizontal scroll so bars never clip */
+  .chart-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+  }
+  .chart-scroll-wrapper > div {
+    min-width: 480px;
+  }
+
+  /* Modal full screen on mobile */
+  .mobile-modal-sheet {
+    inset: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    max-height: 100vh !important;
+    height: 100vh !important;
+  }
+
+  /* Hide elements marked desktop/tablet only */
+  .hide-on-phone {
+    display: none !important;
+  }
+
+  .show-on-phone {
+    display: flex !important;
+  }
+
+  /* POS Cart Bottom Float Bar */
+  .mobile-cart-float-bar {
+    position: fixed;
+    bottom: 4rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    z-index: 35;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. IPAD / TABLETS (769px to 1024px)
+   -------------------------------------------------------------------------- */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  .responsive-view-container {
+    padding: 1.25rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  /* Food cards in 2 or 3 columns with balanced image heights */
+  .mobile-food-card img {
+    height: 130px !important;
+  }
+
+  /* Charts scale neatly on tablets */
+  .chart-scroll-wrapper > div {
+    min-width: 100%;
+  }
+
+  /* Tablet sidebar drawer styling */
+  .tablet-sidebar-drawer {
+    width: 280px !important;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.7) !important;
+  }
+
+  .hide-on-tablet {
+    display: none !important;
+  }
+
+  .show-on-tablet {
+    display: flex !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. LAPTOPS & DESKTOPS (min-width: 1025px)
+   -------------------------------------------------------------------------- */
+@media screen and (min-width: 1025px) {
+  .responsive-view-container {
+    padding: 1.5rem !important;
+  }
+
+  /* Permanent two-column layouts */
+  .desktop-two-col {
+    display: flex !important;
+    flex-direction: row !important;
+  }
+
+  .hide-on-laptop {
+    display: none !important;
+  }
+
+  .show-on-laptop {
+    display: flex !important;
+  }
+}

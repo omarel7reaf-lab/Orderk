@@ -394,8 +394,8 @@ export const OrderKTerminal: React.FC<OrderKTerminalProps> = ({ isOpen, onClose 
     <div
       className={`fixed z-50 transition-all duration-300 shadow-2xl ${
         isExpanded
-          ? 'inset-4 md:inset-10'
-          : 'bottom-6 right-6 w-[94vw] md:w-[600px]'
+          ? 'inset-2 sm:inset-4 md:inset-10'
+          : 'bottom-2 sm:bottom-6 right-2 sm:right-6 left-2 sm:left-auto w-auto sm:w-[520px] md:w-[600px] h-[78vh] sm:h-auto'
       }`}
       style={{ maxHeight: isExpanded ? undefined : '82vh' }}
     >
