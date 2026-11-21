@@ -309,7 +309,7 @@ export const POSView: React.FC<POSViewProps> = ({ onFireOrder, initialTable = 'T
             >
               <div 
                 onClick={() => handleOpenCustomize(item)}
-                className="relative h-36 overflow-hidden bg-slate-900 cursor-pointer"
+                className="relative h-36 food-card-img overflow-hidden bg-slate-900 cursor-pointer"
               >
                 <SafeImage
                   src={item.image}
@@ -422,7 +422,7 @@ export const POSView: React.FC<POSViewProps> = ({ onFireOrder, initialTable = 'T
       </div>
 
       {/* Right Cart / Order Summary Section */}
-      <div className={`w-full lg:w-80 xl:w-96 bg-[#090c21] border-l border-white/[0.06] flex flex-col justify-between overflow-hidden ${
+      <div className={`pos-cart-panel w-full lg:w-80 xl:w-96 bg-[#090c21] border-l border-white/[0.06] flex flex-col justify-between overflow-y-auto ${
         mobileTab === 'menu' ? 'hidden lg:flex' : 'flex'
       }`}>
         {/* Cart Header */}
