@@ -7,6 +7,7 @@ import { LiveOrdersView } from './views/LiveOrdersView';
 import { KDSView } from './views/KDSView';
 import { FloorTablesView } from './views/FloorTablesView';
 import { MenuRecipesView, ReportsView, StaffView, SettingsView } from './views/OtherViews';
+import { CustomerView } from './views/CustomerView';
 import { OrderKTerminal } from './components/OrderKTerminal';
 import { TransferModal } from './components/TransferModal';
 import { SignOutModal } from './components/SignOutModal';
@@ -38,10 +39,15 @@ const AppContent: React.FC = () => {
   } = usePOS();
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState(localStorage.getItem('orderk_user_role') || 'General Manager');
+  const [currentUserName, setCurrentUserName] = useState(localStorage.getItem('orderk_user_name') || 'Elena Vance');
+
   const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [isSignOutOpen, setIsSignOutOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const isCustomer = currentUserRole === 'Customer' || currentUserRole === 'زبون';
 
   const handleLogOut = () => {
     playChime('bump');
@@ -57,12 +63,40 @@ const AppContent: React.FC = () => {
   if (!isAuthenticated) {
     return (
       <AuthScreen
-        onAuthenticated={() => setIsAuthenticated(true)}
+        onAuthenticated={(name, role) => {
+          setCurrentUserName(name);
+          setCurrentUserRole(role);
+          setIsAuthenticated(true);
+        }}
       />
     );
   }
 
-  // Mobile Bottom Navigation items (for Phone screen)
+  // ─────────────────────────────────────────────────────────────
+  // 1. DEDICATED CUSTOMER APP (Clean, Uncluttered, Separated)
+  // ─────────────────────────────────────────────────────────────
+  if (isCustomer) {
+    return (
+      <div className="min-h-screen w-screen bg-[#070919] text-slate-100 font-sans select-none relative">
+        <CustomerView
+          userName={currentUserName}
+          onOpenTerminal={() => setIsTerminalOpen(true)}
+          onLogOut={handleLogOut}
+        />
+
+        {/* Customer AI Terminal */}
+        <OrderKTerminal
+          isOpen={isTerminalOpen}
+          onClose={() => setIsTerminalOpen(false)}
+          userRole="Customer"
+        />
+      </div>
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // 2. RESTAURANT OWNER & STAFF OPERATIONAL SUITE
+  // ─────────────────────────────────────────────────────────────
   const mobileNavItems: { id: NavView; label: string; icon: any; badge?: number | string }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'pos', label: 'POS', icon: ShoppingCart },
@@ -166,7 +200,6 @@ const AppContent: React.FC = () => {
             );
           })}
 
-          {/* More / Menu trigger in bottom bar */}
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-white transition"
@@ -177,7 +210,7 @@ const AppContent: React.FC = () => {
         </nav>
       </div>
 
-      {/* Floating Terminal Button (Positioned comfortably on Phone & Desktop) */}
+      {/* Floating Terminal Button */}
       {!isTerminalOpen && (
         <button
           onClick={() => setIsTerminalOpen(true)}
@@ -189,7 +222,12 @@ const AppContent: React.FC = () => {
         </button>
       )}
 
-      <OrderKTerminal isOpen={isTerminalOpen} onClose={() => setIsTerminalOpen(false)} />
+      {/* Staff AI Terminal */}
+      <OrderKTerminal 
+        isOpen={isTerminalOpen} 
+        onClose={() => setIsTerminalOpen(false)}
+        userRole={currentUserRole}
+      />
       <TransferModal isOpen={isTransferOpen} onClose={() => setIsTransferOpen(false)} />
       <SignOutModal isOpen={isSignOutOpen} onClose={() => setIsSignOutOpen(false)} onLockTerminal={handleLogOut} />
     </div>

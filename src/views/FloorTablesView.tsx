@@ -8,7 +8,8 @@ import {
   ArrowLeftRight, 
   ExternalLink, 
   Plus, 
-  Maximize2, 
+  Maximize2,
+  Minimize2,
   Layers, 
   ChevronRight,
   TrendingUp,
@@ -27,7 +28,9 @@ export const FloorTablesView: React.FC<FloorTablesViewProps> = ({ onNavigateToPO
     INITIAL_TABLES.find(t => t.id === 't-07') || INITIAL_TABLES[0]
   );
   const [activeSector, setActiveSector] = useState<'main' | 'patio' | 'bar' | 'private'>('main');
-  const [showMobileInspector, setShowMobileInspector] = useState(false);
+  const [isInspectorOpen, setIsInspectorOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const occupiedCount = tables.filter(t => t.status === 'occupied' || t.status === 'selected' || t.status === 'bill-requested' || t.status === 'held').length;
   const availableCount = tables.filter(t => t.status === 'available').length;
@@ -36,7 +39,8 @@ export const FloorTablesView: React.FC<FloorTablesViewProps> = ({ onNavigateToPO
 
   const handleSelectTable = (table: TableItem) => {
     setSelectedTable(table);
-    setShowMobileInspector(true);
+    setIsInspectorOpen(true);
+    setIsMinimized(false);
   };
 
   const markTableClean = (tableId: string) => {
@@ -76,10 +80,27 @@ export const FloorTablesView: React.FC<FloorTablesViewProps> = ({ onNavigateToPO
 
           {/* Right Toolbar */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 font-mono px-2 py-1 rounded bg-[#121636] border border-white/[0.06]">
+            <button
+              onClick={() => {
+                setIsInspectorOpen(!isInspectorOpen);
+                if (isMinimized) setIsMinimized(false);
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition ${
+                isInspectorOpen 
+                  ? 'bg-gradient-to-r from-[#ff9e93] to-[#ff7b72] text-[#1a0808] border-coral-400 font-bold shadow-md shadow-coral-500/20' 
+                  : 'bg-[#121636] hover:bg-[#181f4a] border-white/[0.06] text-slate-300'
+              }`}
+              title="إظهار أو إخفاء لوحة تفاصيل الطاولة الجانبية"
+            >
+              <span>🪑 لوحة الطاولة ({selectedTable?.number || 'T-07'})</span>
+              <span className="text-[10px] opacity-75 font-mono">
+                {isInspectorOpen ? '◀ إخفاء' : '▶ إظهار'}
+              </span>
+            </button>
+            <span className="text-xs text-slate-400 font-mono px-2 py-1 rounded bg-[#121636] border border-white/[0.06] hidden sm:inline-block">
               🔍 100%
             </span>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#121636] hover:bg-[#181f4a] border border-white/[0.06] text-xs font-semibold text-slate-300">
+            <button className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#121636] hover:bg-[#181f4a] border border-white/[0.06] text-xs font-semibold text-slate-300">
               <Layers className="w-3.5 h-3.5 text-blue-400" />
               <span>Floor Layout Editor</span>
             </button>
@@ -285,13 +306,51 @@ export const FloorTablesView: React.FC<FloorTablesViewProps> = ({ onNavigateToPO
         </div>
       </div>
 
-      {/* Right Table Inspector Panel (Permanent on xl, slide-up sheet on mobile/tablet) */}
-      {selectedTable && (
-        <div className={`
-          ${showMobileInspector ? 'fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4' : 'hidden xl:flex'}
-          xl:static xl:w-96 xl:bg-[#090d24] xl:border-l xl:border-white/[0.06] xl:p-0 xl:backdrop-blur-none
-        `}>
-          <div className="w-full sm:max-w-md xl:max-w-none h-[85vh] sm:h-auto sm:max-h-[90vh] xl:h-full rounded-t-3xl sm:rounded-3xl xl:rounded-none bg-[#090d24] border-t sm:border border-white/10 xl:border-none flex flex-col justify-between overflow-y-auto shadow-2xl">
+      {/* Minimized Dock Bar */}
+      {isInspectorOpen && isMinimized && selectedTable && (
+        <div className="fixed bottom-4 right-4 z-50 bg-[#0d1233]/95 border border-coral-500/40 shadow-2xl rounded-2xl px-4 py-2.5 flex items-center gap-3 backdrop-blur-md animate-in slide-in-from-bottom duration-200">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-coral-400 animate-pulse"></span>
+            <span className="text-xs font-bold text-white">طاولة {selectedTable.number}</span>
+            <span className="text-[10px] text-coral-300 font-mono">({selectedTable.guestCount || 2} ضيوف)</span>
+          </div>
+          <div className="flex items-center gap-1 border-l border-white/10 pl-2">
+            <button
+              onClick={() => setIsMinimized(false)}
+              className="p-1 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white"
+              title="تكبير / استعادة اللوحة"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => {
+                setIsInspectorOpen(false);
+                setIsMinimized(false);
+              }}
+              className="p-1 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-400"
+              title="إغلاق"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Slide-over Right Inspector Drawer (Collapsible, Minimizable & Maximizable) */}
+      {isInspectorOpen && !isMinimized && selectedTable && (
+        <div className="fixed inset-0 z-50 flex justify-end animate-in fade-in duration-200">
+          {/* Backdrop on click to close */}
+          <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsInspectorOpen(false)}
+          />
+
+          {/* Drawer content sliding in from right */}
+          <div 
+            className={`relative z-10 h-full bg-[#090d24] border-l border-white/10 flex flex-col justify-between shadow-2xl transition-all duration-300 ease-in-out ${
+              isExpanded ? 'w-full sm:w-[560px] md:w-[640px]' : 'w-full sm:w-96'
+            }`}
+          >
             {/* Header */}
             <div className="p-4 sm:p-5 border-b border-white/[0.06] bg-[#0c112d] flex items-center justify-between">
               <div>
@@ -308,107 +367,124 @@ export const FloorTablesView: React.FC<FloorTablesViewProps> = ({ onNavigateToPO
                 <p className="text-xs text-slate-400">Section 2 • Center Floor</p>
               </div>
 
-              {/* Close button for mobile/tablet */}
+              {/* Action buttons: Minimize, Maximize, Close */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setIsMinimized(true)}
+                  className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white transition"
+                  title="تصغير للأسفل"
+                >
+                  <Minimize2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white transition"
+                  title={isExpanded ? "استعادة الحجم" : "تكبير اللوحة"}
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setIsInspectorOpen(false)}
+                  className="p-1.5 rounded-lg bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-400 transition"
+                  title="إغلاق اللوحة"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Details & Specs */}
+            <div className="p-5 space-y-4 flex-1 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-xl bg-[#12173a] border border-white/[0.04]">
+                  <span className="text-[10px] text-slate-400 uppercase font-semibold">Duration</span>
+                  <div className="text-sm font-bold text-white mt-0.5">{selectedTable.elapsedMinutes || 0} min</div>
+                  <span className="text-[10px] text-slate-500">Target: 19:45</span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-[#12173a] border border-white/[0.04]">
+                  <span className="text-[10px] text-slate-400 uppercase font-semibold">Guest Count</span>
+                  <div className="text-sm font-bold text-white mt-0.5">{selectedTable.guestCount || 2} <span className="text-slate-400 font-normal">(Cap: {selectedTable.capacity})</span></div>
+                  <span className="text-[10px] text-slate-500">Server: {selectedTable.server || 'Unassigned'}</span>
+                </div>
+              </div>
+
+              {/* Active Ticket Card */}
+              {selectedTable.orderTotal ? (
+                <div className="p-4 rounded-xl bg-[#111638] border border-white/[0.06] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Active Ticket</span>
+                      <div className="text-sm font-bold text-white font-mono">#ORD-1048</div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs text-slate-400">POS Terminal 2</span>
+                      <div className="text-base font-extrabold text-white">${selectedTable.orderTotal.toFixed(2)}</div>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-lg bg-[#0b0f2a] border border-white/[0.04] text-xs space-y-1">
+                    <div className="flex justify-between text-slate-300">
+                      <span>2× Prime Dry-Aged Ribeye 14oz</span>
+                      <span className="font-mono">$116.00</span>
+                    </div>
+                    <div className="flex justify-between text-slate-300">
+                      <span>1× Pan-Seared Chilean Sea Bass</span>
+                      <span className="font-mono">$48.00</span>
+                    </div>
+                    <div className="flex justify-between text-slate-300">
+                      <span>1× Wild Mushroom Pappardelle</span>
+                      <span className="font-mono">$34.50</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-coral-400 font-semibold pt-1">
+                    <span>Kitchen: In Prep (8m elapsed)</span>
+                    <span className="text-[10px] text-slate-400">Pace: On Track</span>
+                  </div>
+                </div>
+              ) : null}
+
+              {/* Notification alert box */}
+              <div className="p-3 rounded-xl bg-[#13193c] border border-white/[0.06] flex items-start gap-3">
+                <TrendingUp className="w-4 h-4 text-coral-400 flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-slate-300 leading-relaxed">
+                  <strong className="text-white block font-semibold">High Turnover Expected (20:00)</strong>
+                  6 dinner parties projected to close within 25 minutes.
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="p-5 bg-[#0a0e28] border-t border-white/[0.06] space-y-2.5">
               <button
-                onClick={() => setShowMobileInspector(false)}
-                className="xl:hidden p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition"
+                onClick={onNavigateToPOS}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ff9e93] to-[#ff7b72] hover:brightness-110 text-[#1a0808] font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-coral-500/25 transition active:scale-95"
               >
-                <X className="w-4 h-4" />
+                <ExternalLink className="w-4 h-4 stroke-[2.5]" />
+                <span>Open in POS Terminal</span>
               </button>
-            </div>
 
-          {/* Details & Specs */}
-          <div className="p-5 space-y-4 flex-1">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-xl bg-[#12173a] border border-white/[0.04]">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold">Duration</span>
-                <div className="text-sm font-bold text-white mt-0.5">{selectedTable.elapsedMinutes || 0} min</div>
-                <span className="text-[10px] text-slate-500">Target: 19:45</span>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <button className="py-2.5 rounded-xl bg-[#141a3d] hover:bg-[#1a2350] border border-white/[0.06] text-slate-300 font-medium flex items-center justify-center gap-1.5">
+                  <ArrowLeftRight className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Transfer Table</span>
+                </button>
+                <button className="py-2.5 rounded-xl bg-[#141a3d] hover:bg-[#1a2350] border border-white/[0.06] text-slate-300 font-medium flex items-center justify-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Merge Tables</span>
+                </button>
               </div>
 
-              <div className="p-3 rounded-xl bg-[#12173a] border border-white/[0.04]">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold">Guest Count</span>
-                <div className="text-sm font-bold text-white mt-0.5">{selectedTable.guestCount || 2} <span className="text-slate-400 font-normal">(Cap: {selectedTable.capacity})</span></div>
-                <span className="text-[10px] text-slate-500">Server: {selectedTable.server || 'Unassigned'}</span>
-              </div>
+              {selectedTable.status === 'cleaning' && (
+                <button
+                  onClick={() => markTableClean(selectedTable.id)}
+                  className="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold border border-emerald-500/40 transition"
+                >
+                  ✓ Mark Clean & Free
+                </button>
+              )}
             </div>
-
-            {/* Active Ticket Card */}
-            {selectedTable.orderTotal ? (
-              <div className="p-4 rounded-xl bg-[#111638] border border-white/[0.06] space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Active Ticket</span>
-                    <div className="text-sm font-bold text-white font-mono">#ORD-1048</div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs text-slate-400">POS Terminal 2</span>
-                    <div className="text-base font-extrabold text-white">${selectedTable.orderTotal.toFixed(2)}</div>
-                  </div>
-                </div>
-
-                <div className="p-2.5 rounded-lg bg-[#0b0f2a] border border-white/[0.04] text-xs space-y-1">
-                  <div className="flex justify-between text-slate-300">
-                    <span>2× Prime Dry-Aged Ribeye 14oz</span>
-                    <span className="font-mono">$116.00</span>
-                  </div>
-                  <div className="flex justify-between text-slate-300">
-                    <span>1× Pan-Seared Chilean Sea Bass</span>
-                    <span className="font-mono">$48.00</span>
-                  </div>
-                  <div className="flex justify-between text-slate-300">
-                    <span>1× Wild Mushroom Pappardelle</span>
-                    <span className="font-mono">$34.50</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between text-xs text-coral-400 font-semibold pt-1">
-                  <span>Kitchen: In Prep (8m elapsed)</span>
-                  <span className="text-[10px] text-slate-400">Pace: On Track</span>
-                </div>
-              </div>
-            ) : null}
-
-            {/* Notification alert box */}
-            <div className="p-3 rounded-xl bg-[#13193c] border border-white/[0.06] flex items-start gap-3">
-              <TrendingUp className="w-4 h-4 text-coral-400 flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-slate-300 leading-relaxed">
-                <strong className="text-white block font-semibold">High Turnover Expected (20:00)</strong>
-                6 dinner parties projected to close within 25 minutes.
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="p-5 bg-[#0a0e28] border-t border-white/[0.06] space-y-2.5">
-            <button
-              onClick={onNavigateToPOS}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ff9e93] to-[#ff7b72] hover:brightness-110 text-[#1a0808] font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-coral-500/25 transition active:scale-95"
-            >
-              <ExternalLink className="w-4 h-4 stroke-[2.5]" />
-              <span>Open in POS Terminal</span>
-            </button>
-
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <button className="py-2.5 rounded-xl bg-[#141a3d] hover:bg-[#1a2350] border border-white/[0.06] text-slate-300 font-medium flex items-center justify-center gap-1.5">
-                <ArrowLeftRight className="w-3.5 h-3.5 text-blue-400" />
-                <span>Transfer Table</span>
-              </button>
-              <button className="py-2.5 rounded-xl bg-[#141a3d] hover:bg-[#1a2350] border border-white/[0.06] text-slate-300 font-medium flex items-center justify-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-purple-400" />
-                <span>Merge Tables</span>
-              </button>
-            </div>
-
-            {selectedTable.status === 'cleaning' && (
-              <button
-                onClick={() => markTableClean(selectedTable.id)}
-                className="w-full py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold border border-emerald-500/40 transition"
-              >
-                ✓ Mark Clean & Free
-              </button>
-            )}
-          </div>
           </div>
         </div>
       )}
