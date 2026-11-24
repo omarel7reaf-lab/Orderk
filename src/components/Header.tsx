@@ -19,6 +19,7 @@ interface HeaderProps {
   onLogOutClick?: () => void;
   onNotificationsClick?: () => void;
   onMenuToggle?: () => void;
+  onSwitchToCustomer?: () => void;
   unreadNotificationsCount?: number;
 }
 
@@ -30,11 +31,15 @@ export const Header: React.FC<HeaderProps> = ({
   onLogOutClick,
   onNotificationsClick,
   onMenuToggle,
+  onSwitchToCustomer,
   unreadNotificationsCount = 3
 }) => {
   const [time, setTime] = useState<string>('');
   const [dateStr, setDateStr] = useState<string>('');
   const [searchVal, setSearchVal] = useState('');
+
+  const currentUserName = localStorage.getItem('orderk_user_name') || 'Elena Vance';
+  const currentUserRole = localStorage.getItem('orderk_user_role') || 'صاحب الموقع';
 
   useEffect(() => {
     const updateTime = () => {
@@ -115,6 +120,17 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="hidden sm:inline">Fast Order</span>
         </button>
 
+        {/* Switch to Customer View */}
+        {onSwitchToCustomer && (
+          <button
+            onClick={onSwitchToCustomer}
+            title="الانتقال الفوري إلى صفحة الزبون لتجربة الطلب"
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold transition shadow-sm active:scale-95"
+          >
+            <span>🍽️ صفحة الزبون</span>
+          </button>
+        )}
+
         {/* Transfer — hidden on small phones */}
         <button 
           onClick={onTransferClick}
@@ -151,18 +167,18 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="relative">
             <SafeImage
               src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80"
-              alt="Elena Vance"
-              fallbackText="EV"
+              alt={currentUserName}
+              fallbackText="OK"
               className="w-8 h-8 rounded-full object-cover ring-1 ring-coral-400/40"
             />
             <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#0a0d20]" />
           </div>
           <div className="hidden md:block text-left">
             <div className="text-xs font-semibold text-white flex items-center gap-1">
-              <span>Elena Vance</span>
+              <span>{currentUserName}</span>
               <Sparkles className="w-3 h-3 text-coral-400" />
             </div>
-            <div className="text-[10px] text-slate-400 leading-none">General Manager</div>
+            <div className="text-[10px] text-amber-300 font-bold leading-none">{currentUserRole}</div>
           </div>
         </div>
 

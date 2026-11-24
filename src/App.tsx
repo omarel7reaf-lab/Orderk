@@ -82,6 +82,14 @@ const AppContent: React.FC = () => {
           userName={currentUserName}
           onOpenTerminal={() => setIsTerminalOpen(true)}
           onLogOut={handleLogOut}
+          onSwitchToOwner={() => {
+            playChime('success');
+            setCurrentUserRole('صاحب الموقع');
+            setCurrentUserName('صاحب الموقع');
+            localStorage.setItem('orderk_user_role', 'صاحب الموقع');
+            localStorage.setItem('orderk_user_name', 'صاحب الموقع');
+            localStorage.setItem('orderk_staff_code', '88888888');
+          }}
         />
 
         {/* Customer AI Terminal */}
@@ -146,6 +154,13 @@ const AppContent: React.FC = () => {
           onNotificationsClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
           unreadNotificationsCount={3}
           onMenuToggle={() => setIsSidebarOpen(prev => !prev)}
+          onSwitchToCustomer={() => {
+            playChime('bump');
+            setCurrentUserRole('زبون');
+            setCurrentUserName('زبون المطعم');
+            localStorage.setItem('orderk_user_role', 'زبون');
+            localStorage.setItem('orderk_user_name', 'زبون المطعم');
+          }}
           onSearch={(q) => {
             if (q.trim().length > 0 && currentView !== 'pos') setCurrentView('pos');
           }}

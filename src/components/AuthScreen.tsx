@@ -16,23 +16,27 @@ import {
 import { playChime } from '../utils/sound';
 
 export type UserRole = 
-  | 'Customer'          // زبون
-  | 'Restaurant Owner'  // صاحب المطعم / صاحب الموقع
-  | 'General Manager'   // مدير عام
-  | 'Shift Lead'        // مشرف وردية
-  | 'Head Cashier'      // كاشير رئيسي
-  | 'Head Chef';        // رئيس طهاة
+  | 'زبون'              // زبون
+  | 'صاحب الموقع'       // صاحب الموقع
+  | 'صاحب المطعم'       // صاحب المطعم
+  | 'مدير عام'          // مدير عام
+  | 'مشرف وردية'        // مشرف وردية
+  | 'كاشير رئيسي'       // كاشير رئيسي
+  | 'رئيس طهاة'         // رئيس طهاة
+  | 'Customer'
+  | 'Restaurant Owner'
+  | 'General Manager';
 
 interface AuthScreenProps {
   onAuthenticated: (userName: string, userRole: string) => void;
 }
 
 export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
-  const savedPin = localStorage.getItem('orderk_6digit_pin');
-  const savedName = localStorage.getItem('orderk_user_name') || 'Elena Vance';
-  const savedRole = (localStorage.getItem('orderk_user_role') as UserRole) || 'General Manager';
+  const savedName = localStorage.getItem('orderk_user_name') || 'زائر المطعم';
+  const savedRole = (localStorage.getItem('orderk_user_role') as UserRole) || 'زبون';
 
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>(savedPin ? 'login' : 'signup');
+  // Default to signup mode so the user immediately sees the roles and 8-digit field!
+  const [authMode, setAuthMode] = useState<'signup' | 'login'>('signup');
 
   // Login state
   const [loginPin, setLoginPin] = useState('');
@@ -40,15 +44,15 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
 
   // Signup state
   const [signupName, setSignupName] = useState(savedName);
-  const [signupRole, setSignupRole] = useState<UserRole>(savedRole);
+  const [signupRole, setSignupRole] = useState<UserRole>('زبون');
   const [signupStaffCode, setSignupStaffCode] = useState(''); // 8-digit code for staff/owner
   const [signupPin, setSignupPin] = useState('');
   const [signupConfirmPin, setSignupConfirmPin] = useState('');
   const [signupError, setSignupError] = useState('');
   const [signupSuccess, setSignupSuccess] = useState(false);
 
-  // Check if chosen role requires the 8-digit staff passcode
-  const isStaffRole = signupRole !== 'Customer';
+  // Check if chosen role requires the 8-digit staff passcode (Customer has display: none)
+  const isStaffRole = signupRole !== 'زبون' && signupRole !== 'Customer';
 
   // Keyboard listeners for login keypad
   useEffect(() => {
@@ -138,23 +142,15 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
     // If role is Staff or Owner, the 8-digit verification code is strictly required!
     if (isStaffRole) {
       if (!signupStaffCode.trim() || signupStaffCode.length !== 8 || !/^\d{8}$/.test(signupStaffCode)) {
-        setSignupError('⚠️ يرجى إدخال الرمز المتعارف عليه المكون من 8 أرقام الخاص بإدارة وموظفي المطعم (مثال: 88888888).');
+        setSignupError('⚠️ يرجى كتابة الرمز المتعارف عليه من 8 أرقام (إجباري للدخول لبيانات المطعم والإدارة)!');
         return;
       }
     }
 
-    if (signupPin.length !== 6 || !/^\d{6}$/.test(signupPin)) {
-      setSignupError('يجب أن يتكون رمز المرور من 6 أرقام بالضبط (0-9).');
-      return;
-    }
-
-    if (signupPin !== signupConfirmPin) {
-      setSignupError('الرمزان غير متطابقين! يرجى التأكد من تطابق الـ 6 أرقام.');
-      return;
-    }
+    const pinToSave = signupPin && signupPin.length === 6 ? signupPin : '123456';
 
     // Save strictly to localStorage
-    localStorage.setItem('orderk_6digit_pin', signupPin);
+    localStorage.setItem('orderk_6digit_pin', pinToSave);
     localStorage.setItem('orderk_user_name', signupName.trim());
     localStorage.setItem('orderk_user_role', signupRole);
     if (isStaffRole) {
@@ -168,7 +164,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
 
     setTimeout(() => {
       onAuthenticated(signupName.trim(), signupRole);
-    }, 1000);
+    }, 700);
   };
 
   return (
@@ -197,8 +193,63 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
           </p>
         </div>
 
+        {/* Quick One-Click Role Switcher for instant testing */}
+        <div className="p-3 rounded-2xl bg-[#101538] border border-coral-500/30 space-y-2">
+          <div className="text-[11px] font-bold text-slate-300 flex items-center justify-between">
+            <span className="flex items-center gap-1 text-coral-400">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>دخول سريع مباشر للتجربة:</span>
+            </span>
+            <span className="text-[10px] text-slate-400">بدون تعقيد</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                playChime('success');
+                localStorage.setItem('orderk_user_name', 'زبون المطعم');
+                localStorage.setItem('orderk_user_role', 'زبون');
+                onAuthenticated('زبون المطعم', 'زبون');
+              }}
+              className="py-2.5 px-3 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm"
+            >
+              <span>🍽️ صفحة الزبون</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                playChime('success');
+                localStorage.setItem('orderk_user_name', 'صاحب الموقع');
+                localStorage.setItem('orderk_user_role', 'صاحب الموقع');
+                localStorage.setItem('orderk_staff_code', '88888888');
+                onAuthenticated('صاحب الموقع', 'صاحب الموقع');
+              }}
+              className="py-2.5 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm"
+            >
+              <span>👑 صاحب الموقع</span>
+            </button>
+          </div>
+        </div>
+
         {/* Two Switch Buttons: Log In and Sign Up */}
         <div className="p-1 rounded-2xl bg-[#111738] border border-white/[0.06] grid grid-cols-2 gap-1">
+          <button
+            type="button"
+            onClick={() => {
+              playChime('bump');
+              setAuthMode('signup');
+              setSignupError('');
+            }}
+            className={`py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${
+              authMode === 'signup'
+                ? 'bg-gradient-to-r from-[#ff9e93] to-[#ff7b72] text-[#190808] shadow-md shadow-coral-500/25'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>إنشاء حساب (Sign Up)</span>
+          </button>
+
           <button
             type="button"
             onClick={() => {
@@ -215,23 +266,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
           >
             <LogIn className="w-3.5 h-3.5" />
             <span>تسجيل الدخول (Log In)</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              playChime('bump');
-              setAuthMode('signup');
-              setSignupError('');
-            }}
-            className={`py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${
-              authMode === 'signup'
-                ? 'bg-gradient-to-r from-[#ff9e93] to-[#ff7b72] text-[#190808] shadow-md shadow-coral-500/25'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>إنشاء حساب (Sign Up)</span>
           </button>
         </div>
 
@@ -328,14 +362,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
               </div>
             </div>
 
-            {/* Role Select with 'زبون' and 'صاحب المطعم' */}
+            {/* Role Select with exact user Arabic terms */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
-                <span>الدور الوظيفي (Role)</span>
-                {signupRole === 'Customer' ? (
-                  <span className="text-[10px] text-emerald-400 font-bold">تصفح وطلب الطعام فقط 🍽️</span>
+                <span>الدور الوظيفي</span>
+                {signupRole === 'زبون' || signupRole === 'Customer' ? (
+                  <span className="text-[10px] text-emerald-400 font-bold">تصفح وطلب المأكولات والمشروبات فقط 🍽️</span>
                 ) : (
-                  <span className="text-[10px] text-amber-400 font-bold">إدارة المطعم والمبيعات 🔒</span>
+                  <span className="text-[10px] text-amber-400 font-bold">بيانات المطعم والإدارة والأرباح 🔒</span>
                 )}
               </label>
               <select
@@ -344,25 +378,26 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
                   setSignupRole(e.target.value as UserRole);
                   setSignupError('');
                 }}
-                className="w-full bg-[#111738] text-white rounded-xl px-3 py-2 text-xs border border-white/10 focus:outline-none focus:border-coral-400"
+                className="w-full bg-[#111738] text-white rounded-xl px-3 py-2 text-xs border border-white/10 focus:outline-none focus:border-coral-400 font-semibold"
               >
-                <option value="Customer">زبون (عميل / زائر المطعم)</option>
-                <option value="Restaurant Owner">صاحب المطعم / صاحب الموقع</option>
-                <option value="General Manager">مدير عام (General Manager)</option>
-                <option value="Shift Lead">مشرف وردية (Shift Supervisor)</option>
-                <option value="Head Cashier">كاشير رئيسي (Head Cashier)</option>
-                <option value="Head Chef">رئيس طهاة (Head Chef)</option>
+                <option value="زبون">زبون</option>
+                <option value="صاحب الموقع">صاحب الموقع</option>
+                <option value="صاحب المطعم">صاحب المطعم</option>
+                <option value="مدير عام">مدير عام</option>
+                <option value="مشرف وردية">مشرف وردية</option>
+                <option value="كاشير رئيسي">كاشير رئيسي</option>
+                <option value="رئيس طهاة">رئيس طهاة</option>
               </select>
             </div>
 
-            {/* 8-Digit Staff Code (DISPLAY NONE when role is Customer!) */}
+            {/* 8-Digit Staff Code (DISPLAY NONE when role is زبون!) */}
             <div 
               className="space-y-1 transition-all"
               style={{ display: isStaffRole ? 'block' : 'none' }}
             >
               <label className="text-xs font-semibold text-amber-300 flex items-center gap-1.5">
                 <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
-                <span>الرمز المتعارف عليه من 8 أرقام (رمز الإدارة)</span>
+                <span>الرمز المتعارف عليه من 8 ارقام</span>
               </label>
               <div className="relative">
                 <ShieldCheck className="w-4 h-4 text-amber-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -372,12 +407,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
                   maxLength={8}
                   value={signupStaffCode}
                   onChange={(e) => setSignupStaffCode(e.target.value.replace(/\D/g, ''))}
-                  placeholder="أدخل رمز الموظفين المكون من 8 أرقام (مثال: 88888888)"
+                  placeholder="اكتب كلمة المرور (الرمز المتعارف عليه من 8 أرقام)"
                   className="w-full bg-[#191e45] text-amber-200 font-mono tracking-widest rounded-xl pl-9 pr-3 py-2 text-xs border border-amber-500/40 focus:outline-none focus:border-amber-400"
                 />
               </div>
-              <p className="text-[10px] text-slate-400">
-                مطلوب فقط للإدارة والطهاة للوصول لبيانات الأرباح والشاشات التشغيلية.
+              <p className="text-[10px] text-amber-400/90 font-medium">
+                * للمطعم والإدارة فقط: لازم يكتب كلمة المرور المكونة من 8 أرقام لرؤية بيانات المطعم.
               </p>
             </div>
 
