@@ -21,7 +21,8 @@ import {
   UtensilsCrossed, 
   Grid2x2,
   Menu,
-  Sparkles
+  Sparkles,
+  BarChart3
 } from 'lucide-react';
 import { POSProvider, usePOS } from './context/POSContext';
 import { playChime } from './utils/sound';
@@ -82,14 +83,6 @@ const AppContent: React.FC = () => {
           userName={currentUserName}
           onOpenTerminal={() => setIsTerminalOpen(true)}
           onLogOut={handleLogOut}
-          onSwitchToOwner={() => {
-            playChime('success');
-            setCurrentUserRole('صاحب الموقع');
-            setCurrentUserName('صاحب الموقع');
-            localStorage.setItem('orderk_user_role', 'صاحب الموقع');
-            localStorage.setItem('orderk_user_name', 'صاحب الموقع');
-            localStorage.setItem('orderk_staff_code', '88888888');
-          }}
         />
 
         {/* Customer AI Terminal */}
@@ -105,13 +98,24 @@ const AppContent: React.FC = () => {
   // ─────────────────────────────────────────────────────────────
   // 2. RESTAURANT OWNER & STAFF OPERATIONAL SUITE
   // ─────────────────────────────────────────────────────────────
-  const mobileNavItems: { id: NavView; label: string; icon: any; badge?: number | string }[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'pos', label: 'POS', icon: ShoppingCart },
-    { id: 'live-orders', label: 'Orders', icon: Receipt, badge: orders.length },
-    { id: 'kds', label: 'KDS', icon: UtensilsCrossed, badge: kdsTickets.length },
-    { id: 'floor-tables', label: 'Tables', icon: Grid2x2 },
-  ];
+  const isOwner = currentUserRole === 'صاحب الموقع' || currentUserRole === 'صاحب المطعم' || currentUserRole === 'Restaurant Owner';
+
+  // For the owner, remove order-taking (POS) from navigation completely
+  const mobileNavItems: { id: NavView; label: string; icon: any; badge?: number | string }[] = isOwner
+    ? [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'live-orders', label: 'Orders', icon: Receipt, badge: orders.length },
+        { id: 'kds', label: 'KDS', icon: UtensilsCrossed, badge: kdsTickets.length },
+        { id: 'floor-tables', label: 'Tables', icon: Grid2x2 },
+        { id: 'reports', label: 'Reports', icon: BarChart3 },
+      ]
+    : [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'pos', label: 'POS', icon: ShoppingCart },
+        { id: 'live-orders', label: 'Orders', icon: Receipt, badge: orders.length },
+        { id: 'kds', label: 'KDS', icon: UtensilsCrossed, badge: kdsTickets.length },
+        { id: 'floor-tables', label: 'Tables', icon: Grid2x2 },
+      ];
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#070919] text-slate-100 font-sans select-none relative">
@@ -139,6 +143,7 @@ const AppContent: React.FC = () => {
           kdsActiveCount={kdsTickets.length}
           onLockClick={handleLogOut}
           onClose={() => setIsSidebarOpen(false)}
+          userRole={currentUserRole}
         />
       </div>
 
@@ -147,9 +152,7 @@ const AppContent: React.FC = () => {
 
         {/* Top Header */}
         <Header
-          onFastOrderClick={() => { setCurrentView('pos'); setIsSidebarOpen(false); }}
           onOpenTerminal={() => setIsTerminalOpen(true)}
-          onTransferClick={() => setIsTransferOpen(true)}
           onLogOutClick={() => setIsSignOutOpen(true)}
           onNotificationsClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
           unreadNotificationsCount={3}

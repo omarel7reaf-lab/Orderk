@@ -12,7 +12,7 @@ import {
 import { SafeImage } from './SafeImage';
 
 interface HeaderProps {
-  onFastOrderClick: () => void;
+  onFastOrderClick?: () => void;
   onSearch?: (query: string) => void;
   onOpenTerminal?: () => void;
   onTransferClick?: () => void;
@@ -53,10 +53,10 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className="h-14 md:h-16 flex-shrink-0 bg-[#0a0d20] border-b border-white/[0.06] px-3 md:px-4 flex items-center justify-between text-xs select-none sticky top-0 z-40">
+    <header className="h-14 md:h-16 flex-shrink-0 bg-[#0a0d20] border-b border-white/[0.06] px-3 md:px-5 flex items-center justify-between text-xs select-none sticky top-0 z-40">
 
       {/* Left: Hamburger (mobile/tablet) + Search */}
-      <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
+      <div className="flex items-center gap-2.5 flex-1 min-w-0 mr-2">
         {/* Hamburger menu — only visible below lg */}
         <button
           onClick={onMenuToggle}
@@ -66,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({
           <Menu className="w-4 h-4" />
         </button>
 
-        {/* Search — full on desktop, icon-only on small phone */}
+        {/* Search */}
         <div className="relative flex-1 max-w-xs hidden sm:block">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -76,76 +76,47 @@ export const Header: React.FC<HeaderProps> = ({
               setSearchVal(e.target.value);
               onSearch?.(e.target.value);
             }}
-            placeholder="Search tickets, tables, items..."
-            className="w-full bg-[#121633] text-slate-200 placeholder-slate-500 rounded-xl pl-9 pr-3 py-2 text-xs border border-white/[0.06] focus:outline-none focus:border-coral-400/50 focus:ring-1 focus:ring-coral-400/30 transition"
+            placeholder="بحث في البيانات والتقارير..."
+            className="w-full bg-[#121633] text-slate-200 placeholder-slate-500 rounded-xl pl-9 pr-3 py-1.5 text-xs border border-white/[0.06] focus:outline-none focus:border-coral-400/50 transition"
           />
         </div>
-        {/* Search icon only on very small screens */}
-        <button className="sm:hidden p-2 rounded-xl bg-[#121633] border border-white/[0.06] text-slate-400">
-          <Search className="w-4 h-4" />
-        </button>
       </div>
 
-      {/* Middle: Live telemetry — only on large screens */}
-      <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#121735] border border-white/[0.06] text-slate-300">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[11px] font-medium">Kitchen: Normal (12 min avg)</span>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#121735] border border-white/[0.06] text-slate-300">
-          <span className="w-2 h-2 rounded-full bg-blue-400" />
-          <span className="text-[11px] font-medium">System Online 99.9%</span>
-        </div>
+      {/* Middle: Clean light status */}
+      <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-[#111636] border border-white/[0.06] text-slate-300 flex-shrink-0">
+        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="text-[11px] font-medium">لوحة المراقبة والبيانات المباشرة</span>
       </div>
 
       {/* Right: Actions + clock + user */}
-      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+
+        {/* Switch to Customer View (for Owner to preview) */}
+        {onSwitchToCustomer && (
+          <button
+            onClick={onSwitchToCustomer}
+            title="معاينة صفحة الزبون"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold transition shadow-sm active:scale-95"
+          >
+            <span>🍽️ معاينة صفحة الزبون</span>
+          </button>
+        )}
 
         {/* Terminal button */}
         <button
           onClick={onOpenTerminal}
-          className="flex items-center gap-1.5 px-2 sm:px-3 py-2 rounded-full bg-[#151b42] hover:bg-[#1b2354] border border-coral-400/30 text-coral-300 font-bold text-xs shadow-sm transition active:scale-95"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#151b42] hover:bg-[#1b2354] border border-coral-400/30 text-coral-300 font-bold text-xs shadow-sm transition active:scale-95"
           title="OrderK AI Terminal"
         >
           <TerminalIcon className="w-3.5 h-3.5 text-coral-400" />
-          <span className="hidden md:inline">Terminal</span>
-        </button>
-
-        {/* Fast Order */}
-        <button
-          onClick={onFastOrderClick}
-          className="flex items-center gap-1.5 px-2 sm:px-3.5 py-2 rounded-full bg-gradient-to-r from-[#ff9e93] to-[#ff7b72] hover:brightness-110 text-[#1b0808] font-bold text-xs shadow-md shadow-coral-500/25 transition active:scale-95"
-        >
-          <Plus className="w-3.5 h-3.5 stroke-[3]" />
-          <span className="hidden sm:inline">Fast Order</span>
-        </button>
-
-        {/* Switch to Customer View */}
-        {onSwitchToCustomer && (
-          <button
-            onClick={onSwitchToCustomer}
-            title="الانتقال الفوري إلى صفحة الزبون لتجربة الطلب"
-            className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-bold transition shadow-sm active:scale-95"
-          >
-            <span>🍽️ صفحة الزبون</span>
-          </button>
-        )}
-
-        {/* Transfer — hidden on small phones */}
-        <button 
-          onClick={onTransferClick}
-          className="hidden sm:flex items-center gap-1.5 px-2 sm:px-3 py-2 rounded-full bg-[#131838] hover:bg-[#182046] border border-white/[0.06] hover:border-blue-400/40 text-slate-300 hover:text-white transition active:scale-95 shadow-sm"
-          title="Transfer Table"
-        >
-          <ArrowLeftRight className="w-3.5 h-3.5 text-blue-400" />
-          <span className="hidden lg:inline">Transfer</span>
+          <span className="hidden md:inline">Terminal AI</span>
         </button>
 
         {/* Notification Bell */}
         <div className="relative">
           <button 
             onClick={onNotificationsClick}
-            className="p-2 rounded-full bg-[#131838] hover:bg-[#182046] border border-white/[0.06] text-slate-300 hover:text-white transition relative active:scale-95"
+            className="p-2 rounded-xl bg-[#131838] hover:bg-[#182046] border border-white/[0.06] text-slate-300 hover:text-white transition relative active:scale-95"
           >
             <Bell className="w-4 h-4" />
             {unreadNotificationsCount > 0 && (
@@ -157,7 +128,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Clock — only on xl */}
-        <div className="hidden xl:flex flex-col items-end pl-2 pr-1 font-mono leading-tight">
+        <div className="hidden xl:flex flex-col items-end pl-2 font-mono leading-tight">
           <span className="text-sm font-bold text-white tracking-wider">{time || '19:42:10'}</span>
           <span className="text-[10px] text-slate-400 font-sans">{dateStr || 'Fri, Oct 24'}</span>
         </div>

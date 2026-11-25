@@ -23,6 +23,7 @@ interface SidebarProps {
   kdsActiveCount?: number;
   onLockClick?: () => void;
   onClose?: () => void;
+  userRole?: string;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -31,11 +32,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   orderCount = 14,
   kdsActiveCount = 6,
   onLockClick,
-  onClose
+  onClose,
+  userRole = localStorage.getItem('orderk_user_role') || 'صاحب الموقع'
 }) => {
+  const isOwner = userRole === 'صاحب الموقع' || userRole === 'صاحب المطعم' || userRole === 'Restaurant Owner';
+
+  // For the owner, remove POS / New Order completely so only site/business data is shown!
   const navItems = [
     { id: 'dashboard' as NavView, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'pos' as NavView, label: 'POS / New Order', icon: ShoppingCart },
+    ...(!isOwner ? [{ id: 'pos' as NavView, label: 'POS / New Order', icon: ShoppingCart }] : []),
     { id: 'live-orders' as NavView, label: 'Live Orders', icon: Receipt, badge: orderCount, badgeColor: 'bg-rose-500/20 text-rose-300 border border-rose-500/30' },
     { id: 'kds' as NavView, label: 'Kitchen Display / KDS', icon: UtensilsCrossed, badge: `${kdsActiveCount} Active`, badgeColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' },
     { id: 'floor-tables' as NavView, label: 'Floor & Tables', icon: Grid2x2, subtext: 'Fl/Patio' },

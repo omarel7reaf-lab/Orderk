@@ -193,44 +193,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
           </p>
         </div>
 
-        {/* Quick One-Click Role Switcher for instant testing */}
-        <div className="p-3 rounded-2xl bg-[#101538] border border-coral-500/30 space-y-2">
-          <div className="text-[11px] font-bold text-slate-300 flex items-center justify-between">
-            <span className="flex items-center gap-1 text-coral-400">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>دخول سريع مباشر للتجربة:</span>
-            </span>
-            <span className="text-[10px] text-slate-400">بدون تعقيد</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                playChime('success');
-                localStorage.setItem('orderk_user_name', 'زبون المطعم');
-                localStorage.setItem('orderk_user_role', 'زبون');
-                onAuthenticated('زبون المطعم', 'زبون');
-              }}
-              className="py-2.5 px-3 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm"
-            >
-              <span>🍽️ صفحة الزبون</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                playChime('success');
-                localStorage.setItem('orderk_user_name', 'صاحب الموقع');
-                localStorage.setItem('orderk_user_role', 'صاحب الموقع');
-                localStorage.setItem('orderk_staff_code', '88888888');
-                onAuthenticated('صاحب الموقع', 'صاحب الموقع');
-              }}
-              className="py-2.5 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm"
-            >
-              <span>👑 صاحب الموقع</span>
-            </button>
-          </div>
-        </div>
-
         {/* Two Switch Buttons: Log In and Sign Up */}
         <div className="p-1 rounded-2xl bg-[#111738] border border-white/[0.06] grid grid-cols-2 gap-1">
           <button
