@@ -174,25 +174,30 @@ export const CustomerView: React.FC<CustomerViewProps> = ({
   };
 
   // ─────────────────────────────────────────────────────────────
-  // Free 3 Starters Calculation:
-  // For each Starter item: the first 3 units are 100% FREE!
-  // Any quantity > 3 is charged at regular unit price.
+  // Free Starters Calculation:
+  // For Truffle Mushroom Arancini: ONLY 1 unit is FREE!
+  // For all other Starters: the first 3 units are 100% FREE!
+  // Any quantity > freeQuota is charged at regular unit price.
   // ─────────────────────────────────────────────────────────────
   const calculateCartItemFinancials = (item: CartItem) => {
     const isStarter = item.category === 'Starters';
     if (isStarter) {
-      const freeCount = Math.min(item.quantity, 3);
-      const paidCount = Math.max(0, item.quantity - 3);
+      const isArancini = item.name.toLowerCase().includes('arancini') || item.menuItemId === 'm20';
+      const freeQuota = isArancini ? 1 : 3;
+      const freeCount = Math.min(item.quantity, freeQuota);
+      const paidCount = Math.max(0, item.quantity - freeQuota);
       const payableAmount = paidCount * item.unitPrice;
       const discountAmount = freeCount * item.unitPrice;
-      return { freeCount, paidCount, payableAmount, discountAmount, isStarter: true };
+      return { freeCount, paidCount, payableAmount, discountAmount, isStarter: true, freeQuota, isArancini };
     }
     return {
       freeCount: 0,
       paidCount: item.quantity,
       payableAmount: item.quantity * item.unitPrice,
       discountAmount: 0,
-      isStarter: false
+      isStarter: false,
+      freeQuota: 0,
+      isArancini: false
     };
   };
 
@@ -351,14 +356,14 @@ export const CustomerView: React.FC<CustomerViewProps> = ({
                 قائمة المأكولات والأسعار المنطقية
               </span>
               <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-black text-[10px] shadow-sm animate-pulse">
-                🎁 عرض خاص: أول 3 قطع من كل نوع مقبلات مجاناً!
+                🎁 عرض خاص: أول 3 قطع مقبلات مجاناً (وقطعة مجانية لـ Arancini)!
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-white">
               {isAuthenticated ? `مرحباً يا ${userName}، ماذا تحب أن تتناول اليوم؟` : 'مرحباً بك! تصفح قائمة طعام OrderK بأفضل الأسعار'}
             </h1>
             <p className="text-xs text-slate-300 mt-1 max-w-xl leading-relaxed">
-              جميع الأسعار منطقية وبالجنيه المصري (ج.م). اطلب أي مقبلات وستحصل على أول 3 قطع من كل طبق مقبلات هدية مجانية بالكامل.
+              جميع الأسعار منطقية وبالجنيه المصري (ج.م). اطلب أي مقبلات وستحصل على أول 3 قطع مجاناً (وقطعة مجانية لـ Truffle Arancini).
             </p>
           </div>
 
@@ -430,7 +435,11 @@ export const CustomerView: React.FC<CustomerViewProps> = ({
                   {/* Free Starter Promotional Badge */}
                   {isStarter && (
                     <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-black bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg flex items-center gap-1">
-                      <span>🎁 أول 3 قطع مجاناً!</span>
+                      <span>
+                        {item.name.toLowerCase().includes('arancini') || item.id === 'm20'
+                          ? '🎁 أول قطعة مجاناً!'
+                          : '🎁 أول 3 قطع مجاناً!'}
+                      </span>
                     </div>
                   )}
 
@@ -467,7 +476,9 @@ export const CustomerView: React.FC<CustomerViewProps> = ({
                       </div>
                       {isStarter && (
                         <span className="text-[10px] text-emerald-400 font-bold block -mt-1">
-                          أول 3 قطع بـ 0 ج.م
+                          {item.name.toLowerCase().includes('arancini') || item.id === 'm20'
+                            ? 'أول قطعة بـ 0 ج.م'
+                            : 'أول 3 قطع بـ 0 ج.م'}
                         </span>
                       )}
                     </div>
@@ -570,7 +581,7 @@ export const CustomerView: React.FC<CustomerViewProps> = ({
                                   {fin.payableAmount.toFixed(2)} ج.م
                                 </span>
                                 <span className="text-[10px] text-emerald-400 font-semibold">
-                                  (3 مجاناً + {fin.paidCount} بالسعر الأصلي)
+                                  ({fin.freeQuota} مجاناً + {fin.paidCount} بالسعر الأصلي)
                                 </span>
                               </div>
                             )
@@ -583,7 +594,7 @@ export const CustomerView: React.FC<CustomerViewProps> = ({
 
                         {fin.isStarter && (
                           <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">
-                            🎁 تم استخدام {fin.freeCount} من 3 قطع مجانية
+                            🎁 تم استخدام {fin.freeCount} من {fin.freeQuota} {fin.freeQuota === 1 ? 'قطعة مجانية' : 'قطع مجانية'}
                           </span>
                         )}
                       </div>

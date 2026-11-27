@@ -85,7 +85,7 @@ export const MENU_ITEMS: MenuItem[] = [
     revenueTonight: 1755
   },
 
-  // --- Starters (أول 3 قطع مجاناً) ---
+  // --- Starters (أول 3 قطع مجاناً، وArancini أول قطعة مجاناً) ---
   {
     id: 'm11',
     name: 'Burrata & Heirloom Tartare',
@@ -97,18 +97,6 @@ export const MENU_ITEMS: MenuItem[] = [
     margin: '79%',
     soldTonight: 28,
     revenueTonight: 1260
-  },
-  {
-    id: 'm17',
-    name: 'Wagyu Beef Carpaccio',
-    description: 'Thinly sliced wagyu tenderloin, white truffle oil, fried capers, 24m parmigiano (أول 3 قطع مجاناً)',
-    price: 50.00,
-    category: 'Starters',
-    image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80',
-    tag: { label: '3 مجاناً 🎁', type: 'special' },
-    margin: '73%',
-    soldTonight: 22,
-    revenueTonight: 1100
   },
   {
     id: 'm18',
@@ -137,11 +125,11 @@ export const MENU_ITEMS: MenuItem[] = [
   {
     id: 'm20',
     name: 'Truffle Mushroom Arancini',
-    description: 'Crispy saffron risotto balls, mozzarella di bufala core, black garlic truffle dip (أول 3 قطع مجاناً)',
+    description: 'Crispy saffron risotto balls, mozzarella di bufala core, black garlic truffle dip (أول قطعة مجاناً 🎁)',
     price: 38.00,
     category: 'Starters',
     image: 'https://images.unsplash.com/photo-1541529086526-db283c563270?w=600&auto=format&fit=crop&q=80',
-    tag: { label: '3 مجاناً 🎁', type: 'special' },
+    tag: { label: '1 مجاناً 🎁', type: 'special' },
     margin: '80%',
     soldTonight: 33,
     revenueTonight: 1254
