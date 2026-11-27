@@ -39,21 +39,38 @@ const AppContent: React.FC = () => {
     activeTableId
   } = usePOS();
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUserRole, setCurrentUserRole] = useState(localStorage.getItem('orderk_user_role') || 'General Manager');
-  const [currentUserName, setCurrentUserName] = useState(localStorage.getItem('orderk_user_name') || 'Elena Vance');
+  // Authentication & Guest State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('orderk_active_session') === 'true';
+  });
+
+  const [currentUserRole, setCurrentUserRole] = useState<string>(() => {
+    return localStorage.getItem('orderk_user_role') || 'زبون';
+  });
+
+  const [currentUserName, setCurrentUserName] = useState<string>(() => {
+    return localStorage.getItem('orderk_user_name') || 'زائر المطعم';
+  });
+
+  // Modal Auth Mode ('login' | 'signup' | null)
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'signup' | null>(null);
+
+  // Owner Preview Mode for Customer Page
+  const [isOwnerPreviewingCustomer, setIsOwnerPreviewingCustomer] = useState(false);
 
   const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [isSignOutOpen, setIsSignOutOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const isCustomer = currentUserRole === 'Customer' || currentUserRole === 'زبون';
+  const isCustomer = !isAuthenticated || currentUserRole === 'Customer' || currentUserRole === 'زبون' || isOwnerPreviewingCustomer;
 
   const handleLogOut = () => {
     playChime('bump');
     setIsAuthenticated(false);
+    setIsOwnerPreviewingCustomer(false);
     setIsSignOutOpen(false);
+    localStorage.removeItem('orderk_active_session');
   };
 
   const handleNavigate = (view: NavView) => {
@@ -61,29 +78,48 @@ const AppContent: React.FC = () => {
     setIsSidebarOpen(false);
   };
 
-  if (!isAuthenticated) {
-    return (
-      <AuthScreen
-        onAuthenticated={(name, role) => {
-          setCurrentUserName(name);
-          setCurrentUserRole(role);
-          setIsAuthenticated(true);
-        }}
-      />
-    );
-  }
+  const handleAuthenticated = (name: string, role: string) => {
+    setCurrentUserName(name);
+    setCurrentUserRole(role);
+    setIsAuthenticated(true);
+    setAuthModalMode(null);
+    setIsOwnerPreviewingCustomer(false);
+    localStorage.setItem('orderk_active_session', 'true');
+    localStorage.setItem('orderk_user_role', role);
+    localStorage.setItem('orderk_user_name', name);
+  };
 
   // ─────────────────────────────────────────────────────────────
   // 1. DEDICATED CUSTOMER APP (Clean, Uncluttered, Separated)
+  // Accessible immediately as Guest or logged-in Customer
   // ─────────────────────────────────────────────────────────────
   if (isCustomer) {
     return (
       <div className="min-h-screen w-screen bg-[#070919] text-slate-100 font-sans select-none relative">
         <CustomerView
-          userName={currentUserName}
+          userName={isAuthenticated ? currentUserName : 'زائر المطعم'}
+          userRole={currentUserRole}
+          isAuthenticated={isAuthenticated}
           onOpenTerminal={() => setIsTerminalOpen(true)}
           onLogOut={handleLogOut}
+          onOpenLogin={() => setAuthModalMode('login')}
+          onOpenSignup={() => setAuthModalMode('signup')}
+          onSwitchToOwner={
+            isOwnerPreviewingCustomer 
+              ? () => setIsOwnerPreviewingCustomer(false) 
+              : undefined
+          }
         />
+
+        {/* Auth Modal when user clicks Log In or Sign Up from navbar */}
+        {authModalMode && (
+          <AuthScreen
+            initialMode={authModalMode}
+            isModal={true}
+            onClose={() => setAuthModalMode(null)}
+            onAuthenticated={handleAuthenticated}
+          />
+        )}
 
         {/* Customer AI Terminal */}
         <OrderKTerminal
@@ -159,10 +195,7 @@ const AppContent: React.FC = () => {
           onMenuToggle={() => setIsSidebarOpen(prev => !prev)}
           onSwitchToCustomer={() => {
             playChime('bump');
-            setCurrentUserRole('زبون');
-            setCurrentUserName('زبون المطعم');
-            localStorage.setItem('orderk_user_role', 'زبون');
-            localStorage.setItem('orderk_user_name', 'زبون المطعم');
+            setIsOwnerPreviewingCustomer(true);
           }}
           onSearch={(q) => {
             if (q.trim().length > 0 && currentView !== 'pos') setCurrentView('pos');

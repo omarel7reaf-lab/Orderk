@@ -6,156 +6,157 @@ export const MENU_ITEMS: MenuItem[] = [
     id: 'm1',
     name: 'Prime Ribeye 12oz',
     description: 'USDA Prime aged 28 days, wood-fired with garlic herb butter & roasted shallots',
-    price: 52.00,
+    price: 145.00,
     category: 'Steaks & Mains',
     image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Chef Special', type: 'special' },
     margin: '72%',
     soldTonight: 38,
-    revenueTonight: 1976
+    revenueTonight: 5510
   },
   {
     id: 'm2',
     name: 'Filet Mignon 8oz',
     description: 'Center-cut tenderloin, shallot thyme reduction, truffled potato puree',
-    price: 58.00,
+    price: 155.00,
     category: 'Steaks & Mains',
     image: 'https://images.unsplash.com/photo-1558030006-450675393462?w=600&auto=format&fit=crop&q=80',
     tag: { label: '6 Left', type: 'warning' },
     margin: '68%',
     soldTonight: 18,
-    revenueTonight: 1044
+    revenueTonight: 2790
   },
   {
     id: 'm13',
     name: 'Dry-Aged Tomahawk 34oz',
     description: '45-day dry-aged bone-in tomahawk, roasted marrow, chimichurri, feeds 2-3',
-    price: 135.00,
+    price: 210.00,
     category: 'Steaks & Mains',
     image: 'https://images.unsplash.com/photo-1546964124-0cce460f38ef?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Chef Special', type: 'special' },
     margin: '75%',
     soldTonight: 7,
-    revenueTonight: 945
+    revenueTonight: 1470
   },
   {
     id: 'm14',
     name: 'New York Strip 14oz',
     description: 'USDA Prime strip, green peppercorn cognac sauce, grilled asparagus',
-    price: 49.00,
+    price: 135.00,
     category: 'Steaks & Mains',
     image: 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=600&auto=format&fit=crop&q=80',
     margin: '71%',
     soldTonight: 21,
-    revenueTonight: 1029
+    revenueTonight: 2835
   },
   {
     id: 'm6',
     name: 'Pan-Roasted Duck Breast',
     description: 'Maple Leaf Farms duck breast, sour cherry jus, parsnip puree, glazed figs',
-    price: 36.00,
+    price: 125.00,
     category: 'Steaks & Mains',
     image: 'https://images.unsplash.com/photo-1514944298352-d4a34b2fefd7?w=600&auto=format&fit=crop&q=80',
     margin: '74%',
     soldTonight: 16,
-    revenueTonight: 576
+    revenueTonight: 2000
   },
-
   {
     id: 'm15',
     name: '12-Hour Braised Short Ribs',
     description: 'Slow-cooked in Barolo red wine, creamy polenta, gremolata, crispy leeks',
-    price: 39.00,
+    price: 130.00,
     category: 'Steaks & Mains',
     image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Popular', type: 'popular' },
     margin: '76%',
     soldTonight: 27,
-    revenueTonight: 1053
+    revenueTonight: 3510
   },
   {
     id: 'm16',
     name: 'Japanese A5 Wagyu Striploin 6oz',
     description: 'Miyazaki Prefecture certified A5, smoked volcanic salt, fresh wasabi demiglace',
-    price: 120.00,
+    price: 195.00,
     category: 'Steaks & Mains',
     image: 'https://images.unsplash.com/photo-1558030006-450675393462?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Chef Special', type: 'special' },
     margin: '65%',
     soldTonight: 9,
-    revenueTonight: 1080
+    revenueTonight: 1755
   },
 
-  // --- Starters ---
-
+  // --- Starters (أول 3 قطع مجاناً) ---
   {
     id: 'm11',
     name: 'Burrata & Heirloom Tartare',
-    description: 'Pugliese burrata, heirloom cherry tomatoes, cold-pressed basil oil, grilled sourdough',
-    price: 22.00,
+    description: 'Pugliese burrata, heirloom cherry tomatoes, cold-pressed basil oil, grilled sourdough (أول 3 قطع مجاناً)',
+    price: 45.00,
     category: 'Starters',
     image: 'https://images.unsplash.com/photo-1592417817098-8f3d6910985b?w=600&auto=format&fit=crop&q=80',
-    tag: { label: 'Vegetarian', type: 'vegetarian' },
+    tag: { label: '3 مجاناً 🎁', type: 'special' },
     margin: '79%',
     soldTonight: 28,
-    revenueTonight: 616
+    revenueTonight: 1260
   },
   {
     id: 'm17',
     name: 'Wagyu Beef Carpaccio',
-    description: 'Thinly sliced wagyu tenderloin, white truffle oil, fried capers, 24m parmigiano',
-    price: 24.00,
+    description: 'Thinly sliced wagyu tenderloin, white truffle oil, fried capers, 24m parmigiano (أول 3 قطع مجاناً)',
+    price: 50.00,
     category: 'Starters',
     image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80',
+    tag: { label: '3 مجاناً 🎁', type: 'special' },
     margin: '73%',
     soldTonight: 22,
-    revenueTonight: 528
+    revenueTonight: 1100
   },
   {
     id: 'm18',
     name: 'French Onion Soup Gratinée',
-    description: 'Caramelized sweet onions, rich beef broth, melted Gruyère & aged fontina crust',
-    price: 16.00,
+    description: 'Caramelized sweet onions, rich beef broth, melted Gruyère & aged fontina crust (أول 3 قطع مجاناً)',
+    price: 35.00,
     category: 'Starters',
     image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&auto=format&fit=crop&q=80',
+    tag: { label: '3 مجاناً 🎁', type: 'special' },
     margin: '82%',
     soldTonight: 18,
-    revenueTonight: 288
+    revenueTonight: 630
   },
   {
     id: 'm19',
     name: 'Ahi Tuna Tartare',
-    description: 'Sashimi-grade yellowfin tuna, diced Hass avocado, ginger ponzu, sesame crisps',
-    price: 23.00,
+    description: 'Sashimi-grade yellowfin tuna, diced Hass avocado, ginger ponzu, sesame crisps (أول 3 قطع مجاناً)',
+    price: 48.00,
     category: 'Starters',
     image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=600&auto=format&fit=crop&q=80',
-    tag: { label: 'Fresh Catch', type: 'fresh' },
+    tag: { label: '3 مجاناً 🎁', type: 'special' },
     margin: '75%',
     soldTonight: 25,
-    revenueTonight: 575
+    revenueTonight: 1200
   },
   {
     id: 'm20',
     name: 'Truffle Mushroom Arancini',
-    description: 'Crispy saffron risotto balls, mozzarella di bufala core, black garlic truffle dip',
-    price: 17.00,
+    description: 'Crispy saffron risotto balls, mozzarella di bufala core, black garlic truffle dip (أول 3 قطع مجاناً)',
+    price: 38.00,
     category: 'Starters',
     image: 'https://images.unsplash.com/photo-1541529086526-db283c563270?w=600&auto=format&fit=crop&q=80',
-    tag: { label: 'Vegetarian', type: 'vegetarian' },
+    tag: { label: '3 مجاناً 🎁', type: 'special' },
     margin: '80%',
     soldTonight: 33,
-    revenueTonight: 561
+    revenueTonight: 1254
   },
   {
     id: 'm21',
     name: 'Classic Caesar Cardini',
-    description: 'Crisp baby romaine, shaved pecorino romano, garlic brioche croutons, anchovy emulsion',
-    price: 16.00,
+    description: 'Crisp baby romaine, shaved pecorino romano, garlic brioche croutons, anchovy emulsion (أول 3 قطع مجاناً)',
+    price: 36.00,
     category: 'Starters',
     image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=600&auto=format&fit=crop&q=80',
+    tag: { label: '3 مجاناً 🎁', type: 'special' },
     margin: '85%',
     soldTonight: 41,
-    revenueTonight: 656
+    revenueTonight: 1476
   },
 
   // --- Pasta & Risotto ---
@@ -163,72 +164,72 @@ export const MENU_ITEMS: MenuItem[] = [
     id: 'm4',
     name: 'Truffle Tagliolini',
     description: 'Fresh hand-rolled pasta, Norcia black truffles, French butter, aged parmigiano',
-    price: 26.00,
+    price: 75.00,
     category: 'Pasta & Risotto',
     image: 'https://images.unsplash.com/photo-1621996346565-e3d5d6281292?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Vegetarian', type: 'vegetarian' },
     margin: '81%',
     soldTonight: 46,
-    revenueTonight: 1196
+    revenueTonight: 3450
   },
   {
     id: 'm7',
     name: 'Wild Mushroom Risotto',
     description: 'Acquerello carnaroli rice, porcini & morel forest mushrooms, fresh thyme, mascarpone',
-    price: 24.00,
+    price: 70.00,
     category: 'Pasta & Risotto',
     image: 'https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Vegetarian', type: 'vegetarian' },
     margin: '84%',
     soldTonight: 25,
-    revenueTonight: 600
+    revenueTonight: 1750
   },
   {
     id: 'm22',
     name: 'Maine Lobster Ravioli',
     description: 'Handmade pasta pillows stuffed with sweet Maine lobster, saffron bisque, tarragon oil',
-    price: 34.00,
+    price: 95.00,
     category: 'Pasta & Risotto',
     image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Chef Special', type: 'special' },
     margin: '73%',
     soldTonight: 30,
-    revenueTonight: 1020
+    revenueTonight: 2850
   },
   {
     id: 'm23',
     name: 'Pappardelle al Cinghiale',
     description: 'Wide ribbon pasta, slow-braised wild boar ragu, crushed juniper berries, pecorino',
-    price: 28.00,
+    price: 85.00,
     category: 'Pasta & Risotto',
     image: 'https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=600&auto=format&fit=crop&q=80',
     margin: '78%',
     soldTonight: 18,
-    revenueTonight: 504
+    revenueTonight: 1530
   },
   {
     id: 'm24',
     name: 'Spaghetti alle Vongole',
     description: 'Artisanal spaghetti, Manila clams, Pinot Grigio white wine, garlic, red pepper chili flakes',
-    price: 29.00,
+    price: 80.00,
     category: 'Pasta & Risotto',
     image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Fresh Catch', type: 'fresh' },
     margin: '76%',
     soldTonight: 21,
-    revenueTonight: 609
+    revenueTonight: 1680
   },
   {
     id: 'm25',
     name: 'Gnocchi al Gorgonzola Dolce',
     description: 'Pillow-soft handmade potato gnocchi, velvety gorgonzola cream, candied walnuts, sage',
-    price: 23.00,
+    price: 72.00,
     category: 'Pasta & Risotto',
     image: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Vegetarian', type: 'vegetarian' },
     margin: '82%',
     soldTonight: 19,
-    revenueTonight: 437
+    revenueTonight: 1368
   },
 
   // --- Seafood ---
@@ -236,59 +237,59 @@ export const MENU_ITEMS: MenuItem[] = [
     id: 'm5',
     name: 'Chilean Sea Bass',
     description: 'Miso-glazed sustainable sea bass, baby bok choy, shiitake dashi broth, ginger crisps',
-    price: 44.00,
+    price: 120.00,
     category: 'Seafood',
     image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Fresh Catch', type: 'fresh' },
     margin: '70%',
     soldTonight: 22,
-    revenueTonight: 968
+    revenueTonight: 2640
   },
   {
     id: 'm26',
     name: 'Pan-Seared Hokkaido Scallops',
     description: 'Diver scallops, velvety cauliflower puree, crispy pancetta lardons, brown butter foam',
-    price: 38.00,
+    price: 115.00,
     category: 'Seafood',
     image: 'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Popular', type: 'popular' },
     margin: '71%',
     soldTonight: 26,
-    revenueTonight: 988
+    revenueTonight: 2990
   },
   {
     id: 'm27',
     name: 'Grilled Atlantic Salmon',
     description: 'Loch Duart salmon, crispy skin, grilled jumbo asparagus, citrus herb emulsion',
-    price: 32.00,
+    price: 98.00,
     category: 'Seafood',
     image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&auto=format&fit=crop&q=80',
     margin: '77%',
     soldTonight: 34,
-    revenueTonight: 1088
+    revenueTonight: 3332
   },
   {
     id: 'm28',
     name: 'Mediterranean Charred Octopus',
     description: 'Spanish octopus tentacle, smoked paprika oil, romesco sauce, roasted marble potatoes',
-    price: 31.00,
+    price: 95.00,
     category: 'Seafood',
     image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Chef Special', type: 'special' },
     margin: '74%',
     soldTonight: 20,
-    revenueTonight: 620
+    revenueTonight: 1900
   },
   {
     id: 'm29',
     name: 'Whole Dover Sole Meunière',
     description: 'Pan-roasted European Dover sole, browned hazelnut butter, Sicilian capers, fresh lemon',
-    price: 56.00,
+    price: 125.00,
     category: 'Seafood',
     image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600&auto=format&fit=crop&q=80',
     margin: '69%',
     soldTonight: 12,
-    revenueTonight: 672
+    revenueTonight: 1500
   },
 
   // --- Casual & Burgers ---
@@ -296,47 +297,47 @@ export const MENU_ITEMS: MenuItem[] = [
     id: 'm3',
     name: 'Wagyu Burger & Fries',
     description: 'Dry-aged wagyu, aged gouda, black garlic aioli, caramelized onion, brioche bun',
-    price: 26.00,
+    price: 65.00,
     category: 'Casual & Burgers',
     image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Popular', type: 'popular' },
     margin: '78%',
     soldTonight: 42,
-    revenueTonight: 1092
+    revenueTonight: 2730
   },
   {
     id: 'm30',
     name: 'Truffle & Brie Smash Burger',
     description: 'Double wagyu smashed patties, French brie, black truffle aioli, arugula, toasted potato roll',
-    price: 24.00,
+    price: 60.00,
     category: 'Casual & Burgers',
     image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=600&auto=format&fit=crop&q=80',
     margin: '79%',
     soldTonight: 36,
-    revenueTonight: 864
+    revenueTonight: 2160
   },
   {
     id: 'm31',
     name: 'Crispy Buttermilk Chicken Brioche',
     description: 'Free-range chicken breast, spicy hot honey glaze, dill pickles, purple cabbage slaw',
-    price: 21.00,
+    price: 52.00,
     category: 'Casual & Burgers',
     image: 'https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?w=600&auto=format&fit=crop&q=80',
     margin: '81%',
     soldTonight: 29,
-    revenueTonight: 609
+    revenueTonight: 1508
   },
   {
     id: 'm32',
     name: 'Maine Lobster Roll',
     description: 'Chilled knuckle & claw Maine lobster meat, warm brown butter, chives, split-top brioche',
-    price: 32.00,
+    price: 88.00,
     category: 'Casual & Burgers',
     image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Popular', type: 'popular' },
     margin: '72%',
     soldTonight: 24,
-    revenueTonight: 768
+    revenueTonight: 2112
   },
 
   // --- Bar & Cocktails ---
@@ -344,46 +345,46 @@ export const MENU_ITEMS: MenuItem[] = [
     id: 'm10',
     name: 'Smoked Old Fashioned',
     description: 'Bourbon whiskey, hickory wood smoke, demerara sugar, angostura bitters, orange peel',
-    price: 16.00,
+    price: 42.00,
     category: 'Bar & Cocktails',
     image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Popular', type: 'popular' },
     margin: '86%',
     soldTonight: 64,
-    revenueTonight: 1024
+    revenueTonight: 2688
   },
   {
     id: 'm33',
     name: 'Midnight Espresso Martini',
     description: 'Ketel One vodka, fresh pulled espresso shot, Kahlúa liqueur, vanilla syrup, espresso beans',
-    price: 17.00,
+    price: 45.00,
     category: 'Bar & Cocktails',
     image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=600&auto=format&fit=crop&q=80',
     margin: '88%',
     soldTonight: 52,
-    revenueTonight: 884
+    revenueTonight: 2340
   },
   {
     id: 'm34',
     name: 'French 75 Reserve',
     description: 'Botanist gin, fresh lemon juice, simple syrup, topped with Veuve Clicquot champagne',
-    price: 18.00,
+    price: 45.00,
     category: 'Bar & Cocktails',
     image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=600&auto=format&fit=crop&q=80',
     margin: '85%',
     soldTonight: 31,
-    revenueTonight: 558
+    revenueTonight: 1395
   },
   {
     id: 'bev-1',
     name: 'San Pellegrino 750ml',
     description: 'Italian sparkling mineral water, chilled bottle served with lime wedge',
-    price: 8.00,
+    price: 20.00,
     category: 'Bar & Cocktails',
     image: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?w=600&auto=format&fit=crop&q=80',
     margin: '90%',
     soldTonight: 58,
-    revenueTonight: 464
+    revenueTonight: 1160
   },
 
   // --- Desserts ---
@@ -391,47 +392,47 @@ export const MENU_ITEMS: MenuItem[] = [
     id: 'm12',
     name: 'Tiramisù Tradizionale',
     description: 'Espresso-soaked savoiardi ladyfingers, velvety mascarpone cream, Valrhona dark cocoa',
-    price: 14.00,
+    price: 38.00,
     category: 'Desserts',
     image: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=600&auto=format&fit=crop&q=80',
     margin: '88%',
     soldTonight: 34,
-    revenueTonight: 476
+    revenueTonight: 1292
   },
   {
     id: 'm35',
     name: 'Madagascar Vanilla Gelato',
     description: 'Artisanal double scoop gelato, bourbon vanilla bean specks, pizzelle wafer crisp',
-    price: 12.00,
+    price: 28.00,
     category: 'Desserts',
     image: 'https://images.unsplash.com/photo-1560008581-09826d1de69e?w=600&auto=format&fit=crop&q=80',
     margin: '87%',
     soldTonight: 28,
-    revenueTonight: 336
+    revenueTonight: 784
   },
   {
     id: 'm36',
     name: 'Valrhona Chocolate Fondant',
     description: 'Warm molten chocolate cake, dark chocolate lava center, pistachio crumb, vanilla bean gelato',
-    price: 15.00,
+    price: 40.00,
     category: 'Desserts',
     image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Chef Special', type: 'special' },
     margin: '84%',
     soldTonight: 39,
-    revenueTonight: 585
+    revenueTonight: 1560
   },
   {
     id: 'm37',
     name: 'Basque Burnt Cheesecake',
     description: 'Caramelized rustic crust, ultra-creamy custard interior, wild blackberry compote',
-    price: 14.00,
+    price: 36.00,
     category: 'Desserts',
     image: 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=600&auto=format&fit=crop&q=80',
     tag: { label: 'Popular', type: 'popular' },
     margin: '85%',
     soldTonight: 26,
-    revenueTonight: 364
+    revenueTonight: 936
   }
 ];
 

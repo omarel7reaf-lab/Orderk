@@ -40,6 +40,7 @@ export interface CartItem {
   quantity: number;
   modifiers: string[];
   note?: string;
+  category?: string;
 }
 
 export interface Order {
