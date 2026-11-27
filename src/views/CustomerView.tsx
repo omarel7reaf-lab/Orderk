@@ -20,7 +20,8 @@ import {
   AlertCircle,
   ShieldAlert,
   ArrowRight,
-  Key
+  Key,
+  Users
 } from 'lucide-react';
 import { MENU_ITEMS } from '../data/mockData';
 import { MenuItem, CartItem } from '../types/pos';
@@ -273,15 +274,15 @@ export const CustomerView: React.FC<CustomerViewProps> = ({
             <span>اسأل الشيف الذكي</span>
           </button>
 
-          {/* Button to view staff passcode page */}
+          {/* Button to view staff portal */}
           {onOpenStaffPasscode && (
             <button
               onClick={onOpenStaffPasscode}
               className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold transition shadow-sm active:scale-95"
-              title="بوابة العاملين بالمطعم - الكلمة المتعارف عليها"
+              title="بوابة العاملين بالمطعم"
             >
-              <Key className="w-3.5 h-3.5 text-amber-400 stroke-[2.5]" />
-              <span className="hidden sm:inline">كود العاملين 🔑</span>
+              <Users className="w-3.5 h-3.5 text-amber-400 stroke-[2.5]" />
+              <span className="hidden sm:inline">بوابة العاملين 🧑‍🍳</span>
             </button>
           )}
 
@@ -385,8 +386,8 @@ export const CustomerView: React.FC<CustomerViewProps> = ({
                 onClick={onOpenStaffPasscode}
                 className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-300 hover:text-amber-200 underline mt-2 transition active:scale-98"
               >
-                <Key className="w-3.5 h-3.5 text-amber-400 stroke-[2.5]" />
-                <span>هل أنت من العاملين بالمطعم؟ اضغط هنا لعرض الكلمة المتعارف عليها وإرشادات طاقم العمل 🔑</span>
+                <Users className="w-3.5 h-3.5 text-amber-400 stroke-[2.5]" />
+                <span>هل أنت من العاملين بالمطعم؟ اضغط هنا للدخول لمنظومة وبيانات المطعم 🧑‍🍳</span>
               </button>
             )}
           </div>
