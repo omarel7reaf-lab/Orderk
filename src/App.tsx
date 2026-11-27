@@ -13,6 +13,7 @@ import { TransferModal } from './components/TransferModal';
 import { SignOutModal } from './components/SignOutModal';
 import { NotificationsPopover } from './components/NotificationsPopover';
 import { AuthScreen } from './components/AuthScreen';
+import { StaffPasscodeModal } from './components/StaffPasscodeModal';
 import { 
   Terminal as TerminalIcon, 
   LayoutDashboard, 
@@ -57,6 +58,9 @@ const AppContent: React.FC = () => {
 
   // Owner Preview Mode for Customer Page
   const [isOwnerPreviewingCustomer, setIsOwnerPreviewingCustomer] = useState(false);
+
+  // Staff Passcode Page / Modal
+  const [isStaffPasscodeOpen, setIsStaffPasscodeOpen] = useState(false);
 
   const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [isSignOutOpen, setIsSignOutOpen] = useState(false);
@@ -104,11 +108,21 @@ const AppContent: React.FC = () => {
           onLogOut={handleLogOut}
           onOpenLogin={() => setAuthModalMode('login')}
           onOpenSignup={() => setAuthModalMode('signup')}
+          onOpenStaffPasscode={() => setIsStaffPasscodeOpen(true)}
           onSwitchToOwner={
             isOwnerPreviewingCustomer 
               ? () => setIsOwnerPreviewingCustomer(false) 
               : undefined
           }
+        />
+
+        {/* Staff Passcode Modal / Page */}
+        <StaffPasscodeModal
+          isOpen={isStaffPasscodeOpen}
+          onClose={() => setIsStaffPasscodeOpen(false)}
+          onQuickStaffLogin={() => {
+            handleAuthenticated('صاحب المطعم', 'صاحب المطعم');
+          }}
         />
 
         {/* Auth Modal when user clicks Log In or Sign Up from navbar */}
@@ -281,6 +295,10 @@ const AppContent: React.FC = () => {
       />
       <TransferModal isOpen={isTransferOpen} onClose={() => setIsTransferOpen(false)} />
       <SignOutModal isOpen={isSignOutOpen} onClose={() => setIsSignOutOpen(false)} onLockTerminal={handleLogOut} />
+      <StaffPasscodeModal
+        isOpen={isStaffPasscodeOpen}
+        onClose={() => setIsStaffPasscodeOpen(false)}
+      />
     </div>
   );
 };
