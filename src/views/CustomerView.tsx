@@ -93,6 +93,10 @@ export const CustomerView: React.FC<CustomerViewProps> = ({
 
   // Check if an account already exists in localStorage
   const hasExistingAccount = () => {
+    try {
+      const list = localStorage.getItem('orderk_accounts_list');
+      if (list && JSON.parse(list).length > 0) return true;
+    } catch (e) {}
     return Boolean(
       localStorage.getItem('orderk_user_registered') === 'true' || 
       localStorage.getItem('orderk_6digit_pin')

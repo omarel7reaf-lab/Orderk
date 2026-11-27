@@ -13,7 +13,10 @@ import {
   Crown,
   Coffee,
   X,
-  RefreshCw
+  RefreshCw,
+  Mail,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { playChime } from '../utils/sound';
 
@@ -32,6 +35,47 @@ export type UserRole =
 // Master 8-digit passcode for Restaurant Owner and Staff access
 export const MASTER_STAFF_PASSCODE = '89472631';
 
+export interface RegisteredAccount {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  pin: string;
+  staffCode?: string;
+  createdAt: string;
+}
+
+export const getStoredAccounts = (): RegisteredAccount[] => {
+  try {
+    const raw = localStorage.getItem('orderk_accounts_list');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+
+  // Migrate older single-account storage if present
+  const oldPin = localStorage.getItem('orderk_6digit_pin');
+  const oldName = localStorage.getItem('orderk_user_name');
+  const oldRole = (localStorage.getItem('orderk_user_role') as UserRole) || 'زبون';
+  const oldEmail = localStorage.getItem('orderk_user_email') || 'user@orderk.com';
+
+  if (oldPin) {
+    const initialAcc: RegisteredAccount = {
+      id: 'acc-1',
+      name: oldName || 'زائر المطعم',
+      email: oldEmail,
+      role: oldRole,
+      pin: oldPin,
+      createdAt: new Date().toISOString()
+    };
+    localStorage.setItem('orderk_accounts_list', JSON.stringify([initialAcc]));
+    return [initialAcc];
+  }
+
+  return [];
+};
+
 interface AuthScreenProps {
   onAuthenticated: (userName: string, userRole: string) => void;
   initialMode?: 'login' | 'signup';
@@ -46,22 +90,27 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   onClose 
 }) => {
   const savedName = localStorage.getItem('orderk_user_name') || 'زائر المطعم';
+  const savedEmail = localStorage.getItem('orderk_user_email') || '';
   const savedRole = (localStorage.getItem('orderk_user_role') as UserRole) || 'زبون';
 
   // Auth mode: strictly locked to initialMode when provided so Log In shows Log In only, Sign Up shows Sign Up only
   const [authMode, setAuthMode] = useState<'signup' | 'login'>(initialMode);
 
-  // Login state
+  // Login form state
+  const [loginEmail, setLoginEmail] = useState(savedEmail);
   const [loginPin, setLoginPin] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [activeSessionConflict, setActiveSessionConflict] = useState(false);
 
-  // Signup state
+  // Signup form state
   const [signupName, setSignupName] = useState(savedName);
+  const [signupEmail, setSignupEmail] = useState('');
   const [signupRole, setSignupRole] = useState<UserRole>('زبون');
   const [signupStaffCode, setSignupStaffCode] = useState(''); // 8-digit code for staff/owner
   const [signupPin, setSignupPin] = useState('');
   const [signupConfirmPin, setSignupConfirmPin] = useState('');
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [signupError, setSignupError] = useState('');
   const [signupSuccess, setSignupSuccess] = useState(false);
 
@@ -94,54 +143,83 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
   const strengthCount = [isRule1Met, isRule2Met, isRule3Met, isRule4Met].filter(Boolean).length;
 
-  // Keyboard listeners for login keypad
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (authMode === 'login') {
-        if (/^[0-9]$/.test(e.key)) {
-          handleLoginKeypad(e.key);
-        } else if (e.key === 'Backspace') {
-          handleLoginBackspace();
-        } else if (e.key === 'Enter' && loginPin.length === 6) {
-          handleLoginSubmit();
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [authMode, loginPin]);
-
-  const handleLoginKeypad = (num: string) => {
+  const handleKeypadNumberClick = (digit: string) => {
     playChime('bump');
     setLoginError('');
     setActiveSessionConflict(false);
-    if (loginPin.length < 6) {
-      const updated = loginPin + num;
-      setLoginPin(updated);
-      if (updated.length === 6) {
-        verifyAndLogin(updated);
-      }
+    if (loginPin.length < 8) {
+      setLoginPin(prev => prev + digit);
     }
   };
 
-  const handleLoginBackspace = () => {
+  const handleKeypadBackspace = () => {
     playChime('bump');
     setLoginPin(prev => prev.slice(0, -1));
     setLoginError('');
     setActiveSessionConflict(false);
   };
 
-  const handleLoginClear = () => {
+  const handleKeypadClear = () => {
     playChime('bump');
     setLoginPin('');
     setLoginError('');
     setActiveSessionConflict(false);
   };
 
-  const verifyAndLogin = (enteredPin: string, forceOverride: boolean = false) => {
-    const currentStoredPin = localStorage.getItem('orderk_6digit_pin');
-    const currentStoredName = localStorage.getItem('orderk_user_name') || 'Guest';
-    const currentStoredRole = localStorage.getItem('orderk_user_role') || 'مدير عام';
+  // ─────────────────────────────────────────────────────────────
+  // Log In Form Submission (Email + Password)
+  // ─────────────────────────────────────────────────────────────
+  const handleLoginSubmit = (e?: React.FormEvent, forceOverride: boolean = false) => {
+    if (e) e.preventDefault();
+    setLoginError('');
+    setActiveSessionConflict(false);
+
+    const emailTrimmed = loginEmail.trim();
+    if (!emailTrimmed) {
+      playChime('bump');
+      setLoginError('⚠️ يرجى كتابة البريد الإلكتروني (Email Address).');
+      return;
+    }
+
+    if (!loginPin.trim()) {
+      playChime('bump');
+      setLoginError('⚠️ يرجى كتابة كلمة المرور (Password).');
+      return;
+    }
+
+    const accounts = getStoredAccounts();
+    const normalizedEmail = emailTrimmed.toLowerCase();
+
+    // Check emergency staff passcode match
+    const isMasterPasscode = loginPin.trim() === MASTER_STAFF_PASSCODE;
+
+    // Search for user account with matching email
+    const matchedAccount = accounts.find(
+      acc => acc.email.toLowerCase() === normalizedEmail
+    );
+
+    if (!matchedAccount && !isMasterPasscode) {
+      playChime('bump');
+      setLoginError('❌ هذا البريد الإلكتروني غير مسجل! تأكد من كتابة البريد بشكل صحيح أو قم بإنشاء حساب جديد (Sign Up).');
+      return;
+    }
+
+    const targetAccount: RegisteredAccount = matchedAccount || {
+      id: 'emergency-owner',
+      name: 'صاحب الموقع',
+      email: normalizedEmail,
+      role: 'صاحب الموقع' as UserRole,
+      pin: MASTER_STAFF_PASSCODE,
+      createdAt: new Date().toISOString()
+    };
+
+    // Verify Password / PIN
+    const isPasswordCorrect = loginPin === targetAccount.pin || isMasterPasscode;
+    if (!isPasswordCorrect) {
+      playChime('bump');
+      setLoginError('❌ كلمة المرور غير صحيحة لهذا الحساب! يرجى إدخال الرمز الصحيح.');
+      return;
+    }
 
     // Concurrency Lock: Check if account already has an active session
     const isActiveSession = localStorage.getItem('orderk_active_session') === 'true';
@@ -152,54 +230,44 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       return;
     }
 
-    const isMasterMatch = enteredPin === MASTER_STAFF_PASSCODE || enteredPin === MASTER_STAFF_PASSCODE.slice(0, 6);
+    // Success! Log the user in
+    playChime('success');
+    localStorage.setItem('orderk_active_session', 'true');
+    localStorage.setItem('orderk_user_registered', 'true');
+    localStorage.setItem('orderk_user_email', targetAccount.email);
+    localStorage.setItem('orderk_user_name', targetAccount.name);
+    localStorage.setItem('orderk_user_role', targetAccount.role);
+    localStorage.setItem('orderk_6digit_pin', targetAccount.pin);
 
-    if (!currentStoredPin && !isMasterMatch) {
-      setLoginError('لم يتم إنشاء رمز مرور بعد! يرجى استخدام Sign Up لإنشاء حساب.');
-      return;
-    }
-
-    // Only the FIRST registered personal PIN (or master passcode) can log in
-    if (enteredPin === currentStoredPin || isMasterMatch) {
-      playChime('success');
-      setLoginError('');
-      setActiveSessionConflict(false);
-      localStorage.setItem('orderk_active_session', 'true');
-      localStorage.setItem('orderk_user_registered', 'true');
-      setTimeout(() => {
-        onAuthenticated(currentStoredName, currentStoredRole);
-      }, 350);
-    } else {
-      playChime('bump');
-      setLoginError('❌ كلمة المرور غير صحيحة! لا يمكنك الدخول إلا برمز الدخول الشخصي الأصلي المسجل، أو بالضغط على Sign Up لإنشاء حساب جديد.');
-      setTimeout(() => {
-        setLoginPin('');
-      }, 900);
-    }
-  };
-
-  const handleLoginSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (loginPin.length !== 6 && loginPin !== MASTER_STAFF_PASSCODE) {
-      setLoginError('يجب إدخال 6 أرقام كاملة أو الرمز المعتمد.');
-      return;
-    }
-    verifyAndLogin(loginPin);
+    setTimeout(() => {
+      onAuthenticated(targetAccount.name, targetAccount.role);
+    }, 350);
   };
 
   const handleForceOverrideLogin = () => {
     localStorage.removeItem('orderk_active_session');
     setActiveSessionConflict(false);
-    verifyAndLogin(loginPin, true);
+    handleLoginSubmit(undefined, true);
   };
 
-  // Signup Submit handler
+  // ─────────────────────────────────────────────────────────────
+  // Sign Up Form Submission (Name, Email, Role, StaffCode, PIN)
+  // ─────────────────────────────────────────────────────────────
   const handleSignupSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSignupError('');
 
-    if (!signupName.trim()) {
-      setSignupError('يرجى كتابة اسم المستخدم.');
+    const nameTrimmed = signupName.trim();
+    if (!nameTrimmed) {
+      setSignupError('يرجى كتابة اسم المستخدم الكامل.');
+      playChime('bump');
+      return;
+    }
+
+    const emailTrimmed = signupEmail.trim();
+    if (!emailTrimmed || !emailTrimmed.includes('@')) {
+      setSignupError('يرجى كتابة بريد إلكتروني صالح (Valid Email Address).');
+      playChime('bump');
       return;
     }
 
@@ -220,20 +288,47 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
     // PIN check: strictly 6 digits
     if (pinDigitsOnly.length !== 6) {
-      setSignupError('⚠️ يجب أن يتكون رمز الدخول الشخصي من 6 أرقام كاملة بدون حروف.');
+      setSignupError('⚠️ يجب أن تتكون كلمة المرور / رمز الدخول الشخصي من 6 أرقام كاملة بدون حروف.');
       playChime('bump');
       return;
     }
 
     if (signupConfirmPin !== pinDigitsOnly) {
-      setSignupError('❌ تأكيد رمز الدخول غير متطابق مع الرمز الشخصي!');
+      setSignupError('❌ تأكيد كلمة المرور غير متطابق مع الرمز الشخصي!');
       playChime('bump');
       return;
     }
 
-    // Save strictly to localStorage
+    // Check if email already registered in existing accounts
+    const existingAccounts = getStoredAccounts();
+    const isEmailTaken = existingAccounts.some(
+      acc => acc.email.toLowerCase() === emailTrimmed.toLowerCase()
+    );
+
+    if (isEmailTaken) {
+      setSignupError('⚠️ هذا البريد الإلكتروني مسجل بالفعل! اضغط على Log In لتسجيل الدخول به.');
+      playChime('bump');
+      return;
+    }
+
+    // Create and save new registered account
+    const newAccount: RegisteredAccount = {
+      id: `acc-${Date.now()}`,
+      name: nameTrimmed,
+      email: emailTrimmed,
+      role: signupRole,
+      pin: pinDigitsOnly,
+      staffCode: isStaffRole ? signupStaffCode : undefined,
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedList = [...existingAccounts, newAccount];
+    localStorage.setItem('orderk_accounts_list', JSON.stringify(updatedList));
+
+    // Save active session data
     localStorage.setItem('orderk_6digit_pin', pinDigitsOnly);
-    localStorage.setItem('orderk_user_name', signupName.trim());
+    localStorage.setItem('orderk_user_email', emailTrimmed);
+    localStorage.setItem('orderk_user_name', nameTrimmed);
     localStorage.setItem('orderk_user_role', signupRole);
     localStorage.setItem('orderk_user_registered', 'true');
     localStorage.setItem('orderk_active_session', 'true');
@@ -248,12 +343,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     setSignupSuccess(true);
 
     setTimeout(() => {
-      onAuthenticated(signupName.trim(), signupRole);
+      onAuthenticated(nameTrimmed, signupRole);
     }, 700);
   };
 
   return (
-    <div className={`fixed inset-0 z-50 bg-[#060817]/95 backdrop-blur-md flex flex-col items-center justify-center p-3 sm:p-4 select-none overflow-y-auto animate-in fade-in`}>
+    <div className="fixed inset-0 z-50 bg-[#060817]/95 backdrop-blur-md flex flex-col items-center justify-center p-3 sm:p-4 select-none overflow-y-auto animate-in fade-in">
       {/* Background ambient lighting */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-coral-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -286,8 +381,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           </div>
           <p className="text-xs text-slate-400 font-medium">
             {authMode === 'login' 
-              ? 'تسجيل الدخول إلى حسابك (Log In)' 
-              : 'إنشاء حساب جديد لأول مرة (Sign Up)'}
+              ? 'تسجيل الدخول بالبريد الإلكتروني وكلمة المرور' 
+              : 'إنشاء حساب جديد بالبريد الإلكتروني لأول مرة'}
           </p>
         </div>
 
@@ -331,36 +426,73 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           </div>
         )}
 
-        {/* ----------------- MODE 1: LOG IN ----------------- */}
+        {/* ─────────────────────────────────────────────────────────────
+            MODE 1: LOG IN WITH EMAIL AND PASSWORD
+           ───────────────────────────────────────────────────────────── */}
         {authMode === 'login' && (
-          <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="text-center space-y-1">
-              <div className="text-xs uppercase font-bold text-slate-300 tracking-wider">
-                أدخل رمز الدخول الشخصي المكون من 6 أرقام
-              </div>
-              <div className="text-[11px] text-slate-400">
-                الحساب المسجل: <strong className="text-white">{savedName}</strong> ({savedRole === 'Customer' ? 'زبون 🍽️' : `${savedRole} 🔑`})
-              </div>
-            </div>
-
-            {/* 6 PIN Indicator Dots */}
-            <div className="flex items-center justify-center gap-3 py-1">
-              {[0, 1, 2, 3, 4, 5].map((idx) => (
-                <div
-                  key={idx}
-                  className={`w-4 h-4 rounded-full transition-all duration-200 ${
-                    loginPin.length > idx
-                      ? 'bg-coral-400 scale-125 shadow-lg shadow-coral-400/60 ring-2 ring-coral-300'
-                      : 'bg-[#151c44] border-2 border-white/20'
-                  }`}
+          <form onSubmit={(e) => handleLoginSubmit(e)} className="space-y-3.5 animate-in fade-in duration-200">
+            
+            {/* Email Field */}
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-300">
+                البريد الإلكتروني (Email Address)
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="email"
+                  required
+                  value={loginEmail}
+                  onChange={(e) => {
+                    setLoginEmail(e.target.value);
+                    setLoginError('');
+                    setActiveSessionConflict(false);
+                  }}
+                  placeholder="name@example.com"
+                  className="w-full bg-[#111738] text-white rounded-xl pl-9 pr-3 py-2 text-xs border border-white/10 focus:outline-none focus:border-coral-400"
                 />
-              ))}
+              </div>
             </div>
 
-            {/* Error Message & Concurrency Lock Override */}
+            {/* Password Field */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-300">
+                  كلمة المرور (Password / 6 أرقام)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPassword(prev => !prev)}
+                  className="text-[10px] text-slate-400 hover:text-white flex items-center gap-1 transition"
+                >
+                  {showLoginPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                  <span>{showLoginPassword ? 'إخفاء' : 'إظهار'}</span>
+                </button>
+              </div>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type={showLoginPassword ? 'text' : 'password'}
+                  inputMode="numeric"
+                  maxLength={8}
+                  required
+                  value={loginPin}
+                  onChange={(e) => {
+                    const clean = e.target.value.replace(/\D/g, '').slice(0, 8);
+                    setLoginPin(clean);
+                    setLoginError('');
+                    setActiveSessionConflict(false);
+                  }}
+                  placeholder="أدخل كلمة المرور (6 أرقام)"
+                  className="w-full bg-[#111738] text-white font-mono tracking-widest rounded-xl pl-9 pr-3 py-2 text-sm border border-white/10 focus:outline-none focus:border-coral-400"
+                />
+              </div>
+            </div>
+
+            {/* Error Message & Active Session Override */}
             {loginError && (
               <div className="p-3 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs text-center flex flex-col items-center justify-center gap-2 animate-in shake">
-                <div className="flex items-center gap-2 font-semibold">
+                <div className="flex items-center gap-2 font-semibold text-right">
                   <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
                   <span>{loginError}</span>
                 </div>
@@ -377,47 +509,60 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               </div>
             )}
 
-            {/* Numeric Keypad (1-9, Clear, 0, Backspace) */}
-            <div className="grid grid-cols-3 gap-2 max-w-[270px] mx-auto">
-              {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
+            {/* Quick Touch Keypad (1-9, Clear, 0, Backspace) */}
+            <div className="pt-1">
+              <div className="grid grid-cols-3 gap-1.5 max-w-[260px] mx-auto">
+                {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
+                  <button
+                    key={digit}
+                    type="button"
+                    onClick={() => handleKeypadNumberClick(digit)}
+                    className="h-10 rounded-xl bg-[#13193e] hover:bg-[#1a2354] active:scale-95 text-white font-mono text-lg font-bold border border-white/[0.08] shadow-sm transition flex items-center justify-center"
+                  >
+                    {digit}
+                  </button>
+                ))}
+
                 <button
-                  key={digit}
                   type="button"
-                  onClick={() => handleLoginKeypad(digit)}
-                  className="h-11 sm:h-12 rounded-2xl bg-[#13193e] hover:bg-[#1a2354] active:scale-95 text-white font-mono text-xl font-bold border border-white/[0.08] shadow-md transition flex items-center justify-center"
+                  onClick={handleKeypadClear}
+                  className="h-10 rounded-xl bg-[#161a38] hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 text-xs font-bold border border-white/[0.06] transition flex items-center justify-center"
                 >
-                  {digit}
+                  مسح
                 </button>
-              ))}
 
-              <button
-                type="button"
-                onClick={handleLoginClear}
-                className="h-11 sm:h-12 rounded-2xl bg-[#161a38] hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 text-xs font-bold border border-white/[0.06] transition flex items-center justify-center"
-              >
-                مسح
-              </button>
+                <button
+                  type="button"
+                  onClick={() => handleKeypadNumberClick('0')}
+                  className="h-10 rounded-xl bg-[#13193e] hover:bg-[#1a2354] active:scale-95 text-white font-mono text-lg font-bold border border-white/[0.08] shadow-sm transition flex items-center justify-center"
+                >
+                  0
+                </button>
 
-              <button
-                type="button"
-                onClick={() => handleLoginKeypad('0')}
-                className="h-11 sm:h-12 rounded-2xl bg-[#13193e] hover:bg-[#1a2354] active:scale-95 text-white font-mono text-xl font-bold border border-white/[0.08] shadow-md transition flex items-center justify-center"
-              >
-                0
-              </button>
-
-              <button
-                type="button"
-                onClick={handleLoginBackspace}
-                className="h-11 sm:h-12 rounded-2xl bg-[#161a38] hover:bg-white/10 text-slate-300 hover:text-white text-xs font-bold border border-white/[0.06] transition flex items-center justify-center"
-              >
-                حذف ⌫
-              </button>
+                <button
+                  type="button"
+                  onClick={handleKeypadBackspace}
+                  className="h-10 rounded-xl bg-[#161a38] hover:bg-white/10 text-slate-300 hover:text-white text-xs font-bold border border-white/[0.06] transition flex items-center justify-center"
+                >
+                  ⌫
+                </button>
+              </div>
             </div>
-          </div>
+
+            {/* Log In Submit Button */}
+            <button
+              type="submit"
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#ff9e93] to-[#ff7b72] hover:brightness-110 active:scale-95 text-[#190808] font-bold text-xs shadow-lg shadow-coral-500/25 transition mt-2 flex items-center justify-center gap-2"
+            >
+              <LogIn className="w-4 h-4 stroke-[2.5]" />
+              <span>تسجيل الدخول (Log In)</span>
+            </button>
+          </form>
         )}
 
-        {/* ----------------- MODE 2: SIGN UP ----------------- */}
+        {/* ─────────────────────────────────────────────────────────────
+            MODE 2: SIGN UP WITH NAME, EMAIL, ROLE, STAFF CODE, PASSWORD
+           ───────────────────────────────────────────────────────────── */}
         {authMode === 'signup' && (
           <form onSubmit={handleSignupSubmit} className="space-y-3 animate-in fade-in duration-200">
             {/* User Name */}
@@ -431,6 +576,25 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                   value={signupName}
                   onChange={(e) => setSignupName(e.target.value)}
                   placeholder="مثال: عمر الشريف أو زائر المطعم"
+                  className="w-full bg-[#111738] text-white rounded-xl pl-9 pr-3 py-2 text-xs border border-white/10 focus:outline-none focus:border-coral-400"
+                />
+              </div>
+            </div>
+
+            {/* Email Field */}
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-300">البريد الإلكتروني (Email Address)</label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="email"
+                  required
+                  value={signupEmail}
+                  onChange={(e) => {
+                    setSignupEmail(e.target.value);
+                    setSignupError('');
+                  }}
+                  placeholder="name@example.com"
                   className="w-full bg-[#111738] text-white rounded-xl pl-9 pr-3 py-2 text-xs border border-white/10 focus:outline-none focus:border-coral-400"
                 />
               </div>
@@ -518,24 +682,30 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               </p>
             </div>
 
-            {/* Create 6-digit Personal PIN (Strictly numeric, max 6 digits) */}
+            {/* Create 6-digit Personal Password / PIN */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
-                <span>رمز الدخول الشخصي (6 أرقام فقط)</span>
-                <span className="text-[10px] font-mono text-slate-400">
-                  {pinLength} / 6 خانات
-                </span>
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-300">
+                  كلمة المرور / الرمز الشخصي (6 أرقام)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowSignupPassword(prev => !prev)}
+                  className="text-[10px] text-slate-400 hover:text-white flex items-center gap-1 transition"
+                >
+                  {showSignupPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                  <span>{showSignupPassword ? 'إخفاء' : 'إظهار'}</span>
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
-                  type="password"
+                  type={showSignupPassword ? 'text' : 'password'}
                   inputMode="numeric"
                   maxLength={6}
                   required
                   value={signupPin}
                   onChange={(e) => {
-                    // Strictly numbers only, max 6 digits, no letters
                     const clean = e.target.value.replace(/\D/g, '').slice(0, 6);
                     setSignupPin(clean);
                   }}
@@ -549,7 +719,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                  ───────────────────────────────────────────────────────────── */}
               <div className="space-y-1.5 pt-1.5">
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400 font-medium">مستوى قوة وأمان رمز الدخول:</span>
+                  <span className="text-slate-400 font-medium">مستوى قوة وأمان كلمة المرور:</span>
                   <span className={`font-bold transition-colors ${
                     strengthCount === 4 ? 'text-emerald-400' :
                     strengthCount === 3 ? 'text-cyan-400' :
@@ -580,11 +750,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                 <div className="p-2.5 rounded-2xl bg-[#080b20] border border-white/[0.06] space-y-1.5 mt-1">
                   <div className="text-[10px] font-bold text-slate-300 flex items-center gap-1">
                     <Sparkles className="w-3 h-3 text-coral-400" />
-                    <span>إرشادات أمان الرمز الشخصي:</span>
+                    <span>إرشادات أمان كلمة المرور:</span>
                   </div>
 
                   <div className="space-y-1 text-[10px]">
-                    {/* Tip 1 */}
                     <div className={`flex items-start gap-1.5 transition ${isRule1Met ? 'text-emerald-300' : 'text-slate-400'}`}>
                       <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
                         isRule1Met ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40' : 'bg-white/5 text-slate-500'
@@ -594,7 +763,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       <span>أن يتكون الرمز من 6 أرقام كاملة (أو 8 خانات لكلمات المرور المتقدمة)</span>
                     </div>
 
-                    {/* Tip 2 */}
                     <div className={`flex items-start gap-1.5 transition ${isRule2Met ? 'text-emerald-300' : 'text-slate-400'}`}>
                       <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
                         isRule2Met ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40' : 'bg-white/5 text-slate-500'
@@ -604,7 +772,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       <span>أرقام متنوعة وغير متوقعة (مع إمكانية إضافة رموز وعلامات خاصة للأمان العالي)</span>
                     </div>
 
-                    {/* Tip 3 */}
                     <div className={`flex items-start gap-1.5 transition ${isRule3Met ? 'text-emerald-300' : 'text-slate-400'}`}>
                       <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
                         isRule3Met ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40' : 'bg-white/5 text-slate-500'
@@ -614,7 +781,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       <span>تجنب الأرقام المتكررة السهلة (مثل 111111 أو 000000)</span>
                     </div>
 
-                    {/* Tip 4 */}
                     <div className={`flex items-start gap-1.5 transition ${isRule4Met ? 'text-emerald-300' : 'text-slate-400'}`}>
                       <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
                         isRule4Met ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40' : 'bg-white/5 text-slate-500'
@@ -628,10 +794,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               </div>
             </div>
 
-            {/* Confirm 6-digit PIN */}
+            {/* Confirm 6-digit Password */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-300">
-                تأكيد رمز الدخول (6 أرقام)
+                تأكيد كلمة المرور (6 أرقام)
               </label>
               <div className="relative">
                 <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -667,9 +833,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#ff9e93] to-[#ff7b72] hover:brightness-110 active:scale-95 text-[#1a0808] font-bold text-xs shadow-lg shadow-coral-500/25 transition mt-2"
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#ff9e93] to-[#ff7b72] hover:brightness-110 active:scale-95 text-[#1a0808] font-bold text-xs shadow-lg shadow-coral-500/25 transition mt-2 flex items-center justify-center gap-2"
             >
-              حفظ وإنشاء الحساب (Sign Up)
+              <UserPlus className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>حفظ وإنشاء الحساب (Sign Up)</span>
             </button>
           </form>
         )}
